@@ -1,0 +1,46 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "M003aad",
+  "license": "ISC",
+  "devDependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "joi": "^18.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.0.2",
+    "morgan": "^1.10.1",
+    "nodemailer": "^9.0.3",
+    "nodemon": "^3.1.11",
+    "prettier": "^3.9.5",
+    "socket.io": "^4.8.1",
+    "winston": "^3.19.0"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.38.0",
+    "@visulima/disposable-email-domains": "^1.0.0",
+    "exif-reader": "^2.0.3",
+    "helmet": "^8.1.0",
+    "limi": "^1.0.1",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.35.3"
+  }
+}

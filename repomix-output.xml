@@ -1,0 +1,3578 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+config/
+  cors.config.js
+  db.config.js
+  env.config.js
+  helmet.config.js
+  mail.config.js
+  morgan.config.js
+  rateLimit.config.js
+  redis.config.js
+constants/
+  errorCodes.constant.js
+  mailSubjects.constant.js
+  responseMessages.constant.js
+  successCodes.constant.js
+  typesMail.constant.js
+controllers/
+  auth/
+    activation.controller.js
+    forgetPassword.controller.js
+    login.controller.js
+    logout.controller.js
+    logoutFromAll.controller.js
+    register.controller.js
+    resendActivation.controller.js
+    resendForgetPassword.controller.js
+    resetPassword.controller.js
+errors/
+  appError.error.js
+  errorHandler.error.js
+middlewares/
+  auth.middleware.js
+  forgetToken.middleware.js
+  notFound.middleware.js
+  rateLimit.middleware.js
+  uploadPicture.js
+  validate.middleware.js
+models/
+  ActivationToken.model.js
+  ResetToken.model.js
+  Session.model.js
+  User.model.js
+routes/
+  advance.router.js
+  auth.router.js
+services/
+  domain/
+    user.service.js
+  JWT/
+    jwt.service.js
+  mail/
+    templates/
+      activation.service.js
+      reset.service.js
+    mail.service.js
+  token/
+    Token.service.js
+  auth.service.js
+useCases/
+  auth/
+    activate.useCase.js
+    auth.UseCase.js
+    forgetPassword.useCase.js
+    login.useCase.js
+    logout.useCase.js
+    logoutFromAll.useCase.js
+    register.useCase.js
+    resendActivation.useCase.js
+    resendForgetPassword.useCase.js
+    resetPassword.useCase.js
+utils/
+  comparePassword.util.js
+  decodeJWT.util.js
+  extractJWT.util.js
+  generateAccessToken.util.js
+  generateJWT.util.js
+  generateRandomToken.utils.js
+  generateToken.util.js
+  hashPassword.util.js
+  hashToken.util.js
+validators/
+  auth/
+    activation.validator.js
+    forgetPassword.validator.js
+    login.validator.js
+    register.validator.js
+    resendActivation.validator.js
+    resetPassword.validator.js
+.env.example
+.gitignore
+.prettierrc
+app.js
+eslint.config.js
+last.review.md
+package.json
+prompt.to.generate.readme.md
+prompt.to.generate.review.md
+README.md
+Review.md
+server.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="config/cors.config.js">
+import env from './env.config.js';
+
+export const corsConfig = {
+  origin: (origin, callback) => {
+    if (!origin || origin === env.CLIENT_URL) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+export default corsConfig;
+</file>
+
+<file path="config/db.config.js">
+import mongoose from 'mongoose';
+import env from './env.config.js';
+
+export const connectDB = async () => {
+  try {
+    await mongoose.connect(env.MONGO_URI, {
+      autoIndex: env.NODE_ENV !== 'production',
+    });
+
+    console.log('✅ MongoDB connected');
+  } catch (error) {
+    console.error('❌ MongoDB connection failed:', error.message);
+    process.exit(1);
+  }
+};
+</file>
+
+<file path="config/env.config.js">
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const env = {
+  APP_URL: process.env.APP_URL,
+  NODE_ENV: process.env.NODE_ENV,
+  SERVER_PORT: process.env.SERVER_PORT,
+  CLIENT_URL: process.env.CLIENT_URL,
+  MONGO_URI: process.env.MONGO_URI,
+  JWT_SECRET: process.env.JWT_SECRET,
+
+  MAIL_HOST: process.env.MAIL_HOST,
+  MAIL_PORT: process.env.MAIL_PORT,
+  MAIL_SECURE: process.env.MAIL_SECURE,
+  MAIL_USER: process.env.MAIL_USER,
+  MAIL_PASS: process.env.MAIL_PASS,
+  MAIL_FROM: process.env.MAIL_FROM,
+
+  JWT_EXPIRES: process.env.JWT_EXPIRES,
+  JWT_RESEND_EXPIRES: process.env.JWT_RESEND_EXPIRES,
+
+  ACTIVATION_TOKEN_EXPIRES: process.env.ACTIVATION_TOKEN_EXPIRES,
+  RESET_TOKEN_EXPIRES: process.env.RESET_TOKEN_EXPIRES,
+  LENGTH_ACTIVATION_TOKEN: process.env.LENGTH_ACTIVATION_TOKEN,
+  LENGTH_RESET_TOKEN: process.env.LENGTH_RESET_TOKEN,
+};
+
+export default env;
+</file>
+
+<file path="config/helmet.config.js">
+import helmet from 'helmet';
+
+export const helmetMiddleware = helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+});
+</file>
+
+<file path="config/mail.config.js">
+import env from './env.config.js';
+
+export const mailConfig = {
+  host: env.MAIL_HOST,
+  port: Number(env.MAIL_PORT),
+  secure: env.MAIL_SECURE === 'true',
+  auth: {
+    user: env.MAIL_USER,
+    pass: env.MAIL_PASS,
+  },
+  from: env.MAIL_FROM,
+};
+
+export default mailConfig;
+</file>
+
+<file path="config/morgan.config.js">
+import env from './env.config.js';
+
+export const morganConfig = env.NODE_ENV === 'production' ? 'combined' : 'dev';
+</file>
+
+<file path="config/rateLimit.config.js">
+import rateLimit from 'express-rate-limit'; // Fixed: Added missing import
+import createUpstashStore from './redis.config.js';
+import AppError from '../errors/appError.error.js';
+import ERROR_CODES from '../constants/errorCodes.constant.js';
+import { RESPONSE_MESSAGES } from '../constants/responseMessages.constant.js';
+
+const rateLimitHandler = (customErrorCode) => (req, res, next) => {
+  const userFriendlyMessage =
+    RESPONSE_MESSAGES[customErrorCode] || 'Too many requests. Please slow down.';
+  return next(new AppError(userFriendlyMessage, 429, customErrorCode));
+};
+
+export const globalLimiterConfig = {
+  // store: createUpstashStore("ratelimit:global:", 1 * 60),
+  // windowMs: 1 * 60 * 1000,
+  // limit: 1,
+  // standardHeaders: "draft-8",
+  // legacyHeaders: false,
+  store: createUpstashStore('ratelimit:register:', 1 * 60),
+  windowMs: 60 * 60 * 1000,
+  limit: 100,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  handler: rateLimitHandler(ERROR_CODES.RATELIMIT_GLOBAL),
+};
+
+export const authLimiterConfig = {
+  // store: createUpstashStore("ratelimit:auth:", 15 * 60),
+  // windowMs: 15 * 60 * 1000,
+  // limit: 5,
+  // standardHeaders: "draft-8",
+  // legacyHeaders: false,
+  store: createUpstashStore('ratelimit:register:', 1 * 60),
+  windowMs: 60 * 60 * 1000,
+  limit: 100,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  handler: rateLimitHandler(ERROR_CODES.RATELIMIT_LOGIN),
+};
+
+export const registerLimiterConfig = {
+  store: createUpstashStore('ratelimit:register:', 1 * 60),
+  windowMs: 60 * 60 * 1000,
+  limit: 100,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  handler: rateLimitHandler(ERROR_CODES.RATELIMIT_REGISTER),
+};
+
+export const emailSpamLimiterConfig = {
+  // store: createUpstashStore("ratelimit:email:", 5 * 60),
+  // windowMs: 5 * 60 * 1000,
+  // limit: 2,
+  // standardHeaders: "draft-8",
+  // legacyHeaders: false,
+  store: createUpstashStore('ratelimit:register:', 1 * 60),
+  windowMs: 60 * 60 * 1000,
+  limit: 100,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  handler: rateLimitHandler(ERROR_CODES.RATELIMIT_EMAIL),
+};
+
+export const globalLimiter = rateLimit(globalLimiterConfig);
+</file>
+
+<file path="config/redis.config.js">
+import { Redis } from '@upstash/redis';
+
+export const redisClient = Redis.fromEnv();
+
+export const createUpstashStore = (prefix, windowInSeconds = 60) => ({
+  increment: async (key) => {
+    const fullKey = `${prefix}${key}`;
+
+    const p = redisClient.pipeline();
+    p.incr(fullKey);
+    p.ttl(fullKey);
+    const [currentCount, ttl] = await p.exec();
+
+    if (currentCount === 1 || ttl < 0) {
+      await redisClient.expire(fullKey, windowInSeconds);
+    }
+
+    return {
+      totalHits: currentCount,
+      resetTime: new Date(Date.now() + (ttl < 0 ? windowInSeconds : ttl) * 1000),
+    };
+  },
+  decrement: async (key) => {
+    await redisClient.decr(`${prefix}${key}`);
+  },
+  resetKey: async (key) => {
+    await redisClient.del(`${prefix}${key}`);
+  },
+});
+
+export default createUpstashStore;
+</file>
+
+<file path="constants/errorCodes.constant.js">
+const ERROR_CODES = {
+  // Generic Errors
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+  BAD_REQUEST: 'BAD_REQUEST',
+  NOT_FOUND: 'NOT_FOUND',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  CONFLICT: 'CONFLICT',
+  RATELIMIT: 'RATELIMIT',
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  BANNED: 'BANNED',
+  SUSPENDED: 'SUSPENDED',
+  AVATAR_SIZE: 'AVATAR_SIZE_EXCEEDED',
+  AVATAR_FORMAT: 'INVALID_AVATAR_FORMAT',
+  LIMIT_UNEXPECTED_AVATAR: 'LIMIT_UNEXPECTED_AVATAR',
+  ROLE_WAS_CHANGE: 'ROLE_WAS_CHANGE',
+  ROLE_INVALID: 'ROLE_INVALID',
+  INVALID_SIGNATURE: 'INVALID_SIGNATURE',
+  JSON_WEB_TOKEN_ERROR: 'JSON_WEB_TOKEN_ERROR',
+  TOKEN_VERIFICATION_FAILED: 'TOKEN_VERIFICATION_FAILED',
+  TOKEN_NOT_FOUND: 'TOKEN_NOT_FOUND',
+  UESR_ID_INVALID: 'UESR_ID_NO_FOUND',
+
+  // Username Validations
+  USERNAME_REQUIRED: 'USERNAME_REQUIRED',
+  USERNAME_TOO_SHORT: 'USERNAME_TOO_SHORT',
+  USERNAME_TOO_LONG: 'USERNAME_TOO_LONG',
+  USERNAME_ALREADY_EXISTS: 'USERNAME_ALREADY_EXISTS',
+
+  // Firstname Validations
+  FIRSTNAME_REQUIRED: 'FIRSTNAME_REQUIRED',
+  FIRSTNAME_TOO_SHORT: 'FIRSTNAME_TOO_SHORT',
+  FIRSTNAME_TOO_LONG: 'FIRSTNAME_TOO_LONG',
+
+  // Lastname Validations
+  LASTNAME_REQUIRED: 'LASTNAME_REQUIRED',
+  LASTNAME_TOO_SHORT: 'LASTNAME_TOO_SHORT',
+  LASTNAME_TOO_LONG: 'LASTNAME_TOO_LONG',
+
+  // Email Validations
+  EMAIL_REQUIRED: 'EMAIL_REQUIRED',
+  EMAIL_INVALID: 'EMAIL_INVALID',
+  EMAIL_ALREADY_EXISTS: 'EMAIL_ALREADY_EXISTS',
+  MAIL_FAILED_TO_SEND: 'MAIL_FAILED_TO_SEND',
+
+  // Password Validations
+  PASSWORD_REQUIRED: 'PASSWORD_REQUIRED',
+  PASSWORD_TOO_SHORT: 'PASSWORD_TOO_SHORT',
+  PASSWORD_TOO_LONG: 'PASSWORD_TOO_LONG',
+  PASSWORD_WEAK: 'PASSWORD_WEAK',
+  SAME_AS_OLD_PASSWORD: 'SAME_AS_OLD_PASSWORD',
+
+  // Account Activation Errors
+  ACTIVATION_TOKEN_REQUIRED: 'ACTIVATION_TOKEN_REQUIRED',
+  ACTIVATION_TOKEN_INVALID: 'ACTIVATION_TOKEN_INVALID',
+  ACTIVATION_TOKEN_EXPIRED: 'ACTIVATION_TOKEN_EXPIRED',
+  ACTIVATION_TOKEN_NOT_FOUND: 'ACTIVATION_TOKEN_NOT_FOUND',
+  ACCOUNT_ALREADY_ACTIVATED: 'ACCOUNT_ALREADY_ACTIVATED',
+  ACCOUNT_NOT_ACTIVATED: 'ACCOUNT_NOT_ACTIVATED',
+
+  // Auth Failures
+  REGISTER_FAILED: 'REGISTER_FAILED',
+  LOGIN_FAILED: 'LOGIN_FAILED',
+  LOGOUT_FAILED: 'LOGOUT_FAILED',
+
+  // Reset Password Errors
+  FORGET_PASSWORD_FAILED: 'FORGET_PASSWORD_FAILED',
+  RESET_PASSWORD_FAILED: 'RESET_PASSWORD_FAILED',
+  RESEND_FORGET_PASSWORD_FAILED: 'RESEND_FORGET_PASSWORD_FAILED',
+  RESET_TOKEN_REQUIRED: 'RESET_TOKEN_REQUIRED',
+  RESET_TOKEN_NOT_FOUND: 'RESET_TOKEN_NOT_FOUND',
+  RESET_TOKEN_INVALID: 'RESET_TOKEN_INVALID',
+  RESET_TOKEN_EXPIRED: 'RESET_TOKEN_EXPIRED',
+
+  // JWT & Session Errors
+  REFRESH_TOKEN_INVALID: 'REFRESH_TOKEN_INVALID',
+  REFRESH_TOKEN_FAILED: 'REFRESH_TOKEN_FAILED',
+  JWT_INVALID: 'JWT_INVALID',
+  JWT_EXPIRED: 'JWT_EXPIRED',
+  SESSION_INVALID: 'SESSION_INVALID',
+  SESSION_EXPIRED: 'SESSION_EXPIRED',
+
+  // Specific Rate Limit Errors
+  RATELIMIT_GLOBAL: 'RATELIMIT_GLOBAL',
+  RATELIMIT_LOGIN: 'RATELIMIT_LOGIN',
+  RATELIMIT_REGISTER: 'RATELIMIT_REGISTER',
+  RATELIMIT_EMAIL: 'RATELIMIT_EMAIL',
+};
+
+export default ERROR_CODES;
+</file>
+
+<file path="constants/mailSubjects.constant.js">
+const MAIL_SUBJECTS = {
+  ACTIVATION: 'Activate your account',
+  RESET: 'Reset your password',
+};
+
+export default MAIL_SUBJECTS;
+</file>
+
+<file path="constants/responseMessages.constant.js">
+import ERROR_CODES from './errorCodes.constant.js';
+import SUCCESS_CODES from './successCodes.constant.js'; // Fixed spelling typo
+
+export const RESPONSE_MESSAGES = {
+  // --- Generic & Server Responses ---
+  [ERROR_CODES.INTERNAL_SERVER_ERROR]:
+    'Something went wrong on our end. Please try again later.',
+  [ERROR_CODES.BAD_REQUEST]: 'Invalid request parameters. Please check your data.',
+  [ERROR_CODES.NOT_FOUND]: 'The requested resource could not be found.',
+  [ERROR_CODES.UNAUTHORIZED]: 'You are not authorized to perform this action.',
+  [ERROR_CODES.FORBIDDEN]:
+    'Access denied. You do not have permission to view this resource.',
+  [ERROR_CODES.CONFLICT]: 'A conflict occurred with the current state of the resource.',
+  [ERROR_CODES.RATELIMIT]: 'Too many requests. Please slow down and try again later.',
+  [ERROR_CODES.USER_NOT_FOUND]: 'No account found with these details.',
+  [ERROR_CODES.BANNED]:
+    'Your account has been banned. Please check your email for more details or contact support.',
+  [ERROR_CODES.SUSPENDED]:
+    'Your account has been suspended. Please check your email for more details or contact support.',
+  [ERROR_CODES.AVATAR_SIZE_EXCEEDED]: 'File size is too large. Maximum limit is 5MB.',
+  [ERROR_CODES.INVALID_AVATAR_FORMAT]:
+    'Invalid file format. Only JPEG, JPG, and PNG are allowed.',
+  [ERROR_CODES.LIMIT_UNEXPECTED_AVATAR]: 'You can only upload 1 avatar image at a time.',
+  [ERROR_CODES.MAIL_FAILED_TO_SEND]: 'Failed to send the email. Please try again later.',
+  [ERROR_CODES.ROLE_WAS_CHANGE]: 'the role was changed',
+
+  // --- Validation Responses ---
+  [ERROR_CODES.USERNAME_REQUIRED]: 'Username is required.',
+  [ERROR_CODES.USERNAME_TOO_SHORT]: 'Username must be at least 6 characters long.',
+  [ERROR_CODES.USERNAME_TOO_LONG]: 'Username cannot exceed 20 characters.',
+  [ERROR_CODES.USERNAME_ALREADY_EXISTS]: 'This username is already taken.',
+
+  [ERROR_CODES.FIRSTNAME_REQUIRED]: 'First name is required.',
+  [ERROR_CODES.FIRSTNAME_TOO_SHORT]: 'First name must be at least 2 characters long.',
+  [ERROR_CODES.FIRSTNAME_TOO_LONG]: 'First name cannot exceed 30 characters.',
+
+  [ERROR_CODES.LASTNAME_REQUIRED]: 'Last name is required.',
+  [ERROR_CODES.LASTNAME_TOO_SHORT]: 'Last name must be at least 2 characters long.',
+  [ERROR_CODES.LASTNAME_TOO_LONG]: 'Last name cannot exceed 30 characters.',
+
+  [ERROR_CODES.EMAIL_REQUIRED]: 'Email address is required.',
+  [ERROR_CODES.EMAIL_INVALID]: 'Please enter a valid email address.',
+  [ERROR_CODES.EMAIL_ALREADY_EXISTS]: 'This email address is already registered.',
+
+  [ERROR_CODES.PASSWORD_REQUIRED]: 'Password is required.',
+  [ERROR_CODES.PASSWORD_TOO_SHORT]: 'Password must be at least 8 characters long.',
+  [ERROR_CODES.PASSWORD_TOO_LONG]: 'Password cannot exceed 128 characters.',
+  [ERROR_CODES.PASSWORD_WEAK]:
+    'Password must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
+  [ERROR_CODES.SAME_AS_OLD_PASSWORD]:
+    'Your new password cannot be the same as your old password.',
+
+  // --- Authentication Process Responses ---
+  [ERROR_CODES.REGISTER_FAILED]:
+    'Registration failed. Please double-check your inputs and try again.',
+  [SUCCESS_CODES.REGISTER]:
+    'Registration completed successfully! Please check your inbox to activate your account.',
+
+  [ERROR_CODES.LOGIN_FAILED]: 'Invalid email or password. Please try again.',
+  [SUCCESS_CODES.LOGIN]: 'Welcome back! You have logged in successfully.',
+  [ERROR_CODES.ACCOUNT_NOT_ACTIVATED]:
+    'Your account has not been activated yet. Please check your email.',
+
+  // --- Account Activation Responses ---
+  [ERROR_CODES.ACTIVATION_TOKEN_REQUIRED]: 'Activation token is required.',
+  [ERROR_CODES.ACTIVATION_TOKEN_INVALID]: 'The activation link is invalid.',
+  [ERROR_CODES.ACTIVATION_TOKEN_EXPIRED]:
+    'Your activation link has expired. Please request a new one.',
+  [ERROR_CODES.ACTIVATION_TOKEN_NOT_FOUND]: 'Invalid or already used activation token.',
+  [ERROR_CODES.ACCOUNT_ALREADY_ACTIVATED]:
+    'Your account is already activated. You can log in.',
+  [SUCCESS_CODES.ACTIVATION]:
+    'Your account has been successfully activated! You can now log in.',
+  [SUCCESS_CODES.RESEND_ACTIVATION]:
+    'A new activation link has been successfully sent to your email.',
+
+  // --- Password Reset Responses ---
+  [ERROR_CODES.FORGET_PASSWORD_FAILED]:
+    'Failed to process the password reset request. Please try again.',
+  [SUCCESS_CODES.FORGET_PASSWORD]:
+    'A password reset link has been sent to your email. Please check your inbox.',
+  [ERROR_CODES.RESEND_FORGET_PASSWORD_FAILED]:
+    'Failed to resend the password reset email.',
+  [SUCCESS_CODES.RESEND_FORGET_PASSWORD]:
+    'The password reset link has been resent successfully. Please check your inbox.',
+
+  [SUCCESS_CODES.RESET_PASSWORD]:
+    'Your password has been successfully reset. You can now log in with your new password.',
+  [ERROR_CODES.RESET_PASSWORD_FAILED]:
+    'The password reset operation failed. Please try again.',
+  [ERROR_CODES.RESET_TOKEN_REQUIRED]: 'The password reset token is required.',
+  [ERROR_CODES.RESET_TOKEN_INVALID]: 'The reset token is invalid or incorrect.',
+  [ERROR_CODES.RESET_TOKEN_EXPIRED]:
+    'Your reset token has expired. Please request a new code.',
+
+  [SUCCESS_CODES.JWT]: 'Session token generated successfully.',
+  [ERROR_CODES.JWT_EXPIRED]: 'your jwt has expired',
+  [ERROR_CODES.JWT_INVALID]: 'Your session is invalid. Please log in again.',
+  [ERROR_CODES.REFRESH_TOKEN_INVALID]:
+    'Your refresh token is invalid. Please log in again.',
+  [ERROR_CODES.REFRESH_TOKEN_FAILED]: 'Failed to refresh session. Please log in again.',
+  [ERROR_CODES.SESSION_INVALID]: 'Your active session is invalid.',
+  [ERROR_CODES.SESSION_EXPIRED]: 'Your session has expired. Please log in again.',
+
+  // --- Logout Responses ---
+  [SUCCESS_CODES.LOGOUT]: 'Logged out successfully. We hope to see you back soon!',
+  [ERROR_CODES.LOGOUT_FAILED]: 'Logout operation failed. Please try again.',
+
+  // --- Rate Limiting Responses ---
+  [ERROR_CODES.RATELIMIT_GLOBAL]:
+    'Too many requests. Please slow down and try again later.',
+  [ERROR_CODES.RATELIMIT_LOGIN]:
+    'Too many login attempts. Access temporarily locked for security. Please try again later.',
+  [ERROR_CODES.RATELIMIT_REGISTER]:
+    'Registration limit exceeded. Please try again later.',
+  [ERROR_CODES.RATELIMIT_EMAIL]:
+    'Action blocked. Please wait before requesting another verification email.',
+};
+
+export default RESPONSE_MESSAGES;
+</file>
+
+<file path="constants/successCodes.constant.js">
+const SUCCESS_CODES = {
+  REGISTER: 'REGISTER_SUCCESS',
+  ACTIVATION: 'ACTIVATION_SUCCESS',
+  RESEND_ACTIVATION: 'RESEND_RACTIVATION_SUCCESS',
+  LOGIN: 'LOGIN_SUCCESS',
+  FORGET_PASSWORD: 'FORGET_PASSWORD_SUCCESS',
+  RESEND_FORGET_PASSWORD: 'RESEND_FORGET_PASSWORD_SUCCESS',
+  RESET_PASSWORD: 'RESET_PASSWORD_SUCCESS',
+  REFRESH_TOKEN: 'REFRESH_TOKEN_SUCCESS',
+  JWT: 'JWT_SUCCESS',
+  LOGOUT: 'LOGOUT_SUCCESS',
+  LOGOUTFROMALL: 'LOGOUT_FROM_ALL_SUCCESS',
+};
+
+export default SUCCESS_CODES;
+</file>
+
+<file path="constants/typesMail.constant.js">
+const TYPE_MAIL = {
+  ACTIVATION: 'activation',
+  RESET: 'reset',
+};
+
+export default TYPE_MAIL;
+</file>
+
+<file path="controllers/auth/activation.controller.js">
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import SUCCESS_CODES from '../../constants/successCodes.constant.js';
+import activateUseCase from '../../useCases/auth/activate.useCase.js';
+
+export async function activationController(req, res, next) {
+  try {
+    await activateUseCase(req.params.token);
+    res.status(200).json({
+      message: RESPONSE_MESSAGES[SUCCESS_CODES.ACTIVATION],
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export default activationController;
+</file>
+
+<file path="controllers/auth/forgetPassword.controller.js">
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import SUCCESS_CODES from '../../constants/successCodes.constant.js';
+import forgetPasswordUseCase from '../../useCases/auth/forgetPassword.useCase.js';
+
+export async function forgetPasswordController(req, res, next) {
+  try {
+    const email = req.body.email;
+    const { rawToken, resendToken } = await forgetPasswordUseCase(email);
+
+    res.status(201).json({
+      message: RESPONSE_MESSAGES[SUCCESS_CODES.FORGET_PASSWORD],
+      rawToken,
+      resendToken,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export default forgetPasswordController;
+</file>
+
+<file path="controllers/auth/login.controller.js">
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import SUCCESS_CODES from '../../constants/successCodes.constant.js';
+import loginUseCase from '../../useCases/auth/login.useCase.js';
+
+export async function loginController(req, res, next) {
+  const { email, password } = req.body;
+
+  try {
+    const ip = req.ip || null;
+    const userAgent = req.headers['user-agent'] || 'Unkown Device';
+    const data = { ip, email, password, userAgent };
+
+    const token = await loginUseCase(data);
+
+    res.status(201).json({
+      message: RESPONSE_MESSAGES[SUCCESS_CODES.LOGIN],
+      token,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export default loginController;
+</file>
+
+<file path="controllers/auth/logout.controller.js">
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import AppError from '../../errors/appError.error.js';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import SUCCESS_CODES from '../../constants/successCodes.constant.js';
+import extractJWT from '../../utils/extractJWT.util.js';
+import logoutUseCase from '../../useCases/auth/logout.useCase.js';
+
+export async function logoutController(req, res, next) {
+  const token = await extractJWT(req);
+
+  if (!token) {
+    return next(
+      new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.JWT_INVALID,
+      ),
+    );
+  }
+
+  await logoutUseCase(token);
+  res.status(201).json({
+    message: RESPONSE_MESSAGES[SUCCESS_CODES.LOGOUT],
+  });
+}
+
+export default logoutController;
+</file>
+
+<file path="controllers/auth/logoutFromAll.controller.js">
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import AppError from '../../errors/appError.error.js';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import SUCCESS_CODES from '../../constants/successCodes.constant.js';
+import extractJWT from '../../utils/extractJWT.util.js';
+import logoutFromAllUseCase from '../../useCases/auth/logoutFromAll.useCase.js';
+
+export async function logoutFromAllController(req, res, next) {
+  const token = await extractJWT(req);
+
+  if (!token) {
+    return next(
+      new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.JWT_INVALID,
+      ),
+    );
+  }
+
+  await logoutFromAllUseCase(token);
+  res.status(201).json({ message: RESPONSE_MESSAGES[SUCCESS_CODES.LOGOUT] });
+}
+
+export default logoutFromAllController;
+</file>
+
+<file path="controllers/auth/register.controller.js">
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import SUCCESS_CODES from '../../constants/successCodes.constant.js';
+import registerUseCase from '../../useCases/auth/register.useCase.js';
+
+export async function registerController(req, res, next) {
+  try {
+    await registerUseCase({ ...req.body, avatar: req.file?.filename });
+    res.status(201).json({
+      message: RESPONSE_MESSAGES[SUCCESS_CODES.REGISTER],
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export default registerController;
+</file>
+
+<file path="controllers/auth/resendActivation.controller.js">
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import SUCCESS_CODES from '../../constants/successCodes.constant.js';
+import resendActivationUseCase from '../../useCases/auth/resendActivation.useCase.js';
+
+export async function resendActivationController(req, res, next) {
+  try {
+    const email = req.body.email;
+    await resendActivationUseCase(email);
+    res.status(201).json({
+      message: RESPONSE_MESSAGES[SUCCESS_CODES.RESEND_ACTIVATION],
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export default resendActivationController;
+</file>
+
+<file path="controllers/auth/resendForgetPassword.controller.js">
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import SUCCESS_CODES from '../../constants/successCodes.constant.js';
+import resendForgetPasswordUseCase from '../../useCases/auth/resendForgetPassword.useCase.js';
+import extractJWT from '../../utils/extractJWT.util.js';
+import AppError from '../../errors/appError.error.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+
+export async function resendForgetPasswordController(req, res, next) {
+  try {
+    const token = await extractJWT(req);
+
+    if (!token) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.JWT_INVALID,
+      );
+    }
+
+    const code = await resendForgetPasswordUseCase(token);
+
+    res.status(201).json({
+      message: RESPONSE_MESSAGES[SUCCESS_CODES.RESEND_FORGET_PASSWORD],
+      code,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export default resendForgetPasswordController;
+</file>
+
+<file path="controllers/auth/resetPassword.controller.js">
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import SUCCESS_CODES from '../../constants/successCodes.constant.js';
+import resetPasswordUseCase from '../../useCases/auth/resetPassword.useCase.js';
+
+export async function resetPasswordController(req, res, next) {
+  try {
+    const rawToken = req.body.code;
+    const password = req.body.newPassword;
+
+    await resetPasswordUseCase(rawToken, password);
+
+    res.status(201).json({
+      message: RESPONSE_MESSAGES[SUCCESS_CODES.RESET_PASSWORD],
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export default resetPasswordController;
+</file>
+
+<file path="errors/appError.error.js">
+class AppError extends Error {
+  constructor(message, statusCode, code = 'INTERNAL_SERVER_ERROR') {
+    super(message);
+
+    this.message = message;
+    this.statusCode = statusCode;
+    this.code = code;
+    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.isOperational = true;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+export default AppError;
+</file>
+
+<file path="errors/errorHandler.error.js">
+const errorHandler = (err, req, res) => {
+  console.error('🔥 ERROR LOG:', err);
+
+  const statusCode = err.statusCode || 500;
+  // const status = err.status || "error";
+  // const errorCode = err.code || "INTERNAL_SERVER_ERROR";
+
+  const userFriendlyMessage = err.message || 'Something went wrong.';
+
+  return res.status(statusCode).json({
+    // status: status,
+    // code: errorCode,
+    message: userFriendlyMessage,
+  });
+};
+
+export default errorHandler;
+</file>
+
+<file path="middlewares/auth.middleware.js">
+import extractJWT from '../utils/extractJWT.util.js';
+import authUseCase from '../useCases/auth/auth.UseCase.js';
+import AppError from '../errors/appError.error.js';
+import ERROR_CODES from '../constants/errorCodes.constant.js';
+import RESPONSE_MESSAGES from '../constants/responseMessages.constant.js';
+
+export const protect = async (req, res, next) => {
+  try {
+    const token = await extractJWT(req);
+
+    if (!token) {
+      return next(
+        new AppError(
+          RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+          401,
+          ERROR_CODES.JWT_INVALID,
+        ),
+      );
+    }
+
+    const { accessToken, userId, isNew } = await authUseCase(token);
+
+    if (isNew) {
+      res.setHeader('X-New-Access-Token', accessToken);
+      res.setHeader('Access-Control-Expose-Headers', 'X-New-Access-Token');
+    }
+
+    req.oldToken = token;
+    req.accessToken = accessToken;
+    req.userId = userId;
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default protect;
+</file>
+
+<file path="middlewares/forgetToken.middleware.js">
+import decodeJWT from '../utils/decodeJWT.util.js';
+import extractJWT from '../utils/extractJWT.util.js';
+import AppError from '../errors/appError.error.js';
+import ERROR_CODES from '../constants/errorCodes.constant.js';
+import RESPONSE_MESSAGES from '../constants/responseMessages.constant.js';
+
+export const verifyJWTForResend = async (req, res, next) => {
+  try {
+    const token = extractJWT(req);
+
+    if (!token) {
+      return next(
+        new AppError(
+          ERROR_CODES.UNAUTHORIZED,
+          401,
+          RESPONSE_MESSAGES[ERROR_CODES.RESET_TOKEN_INVALID],
+        ),
+      );
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = decodeJWT(token); // Ensure your utility doesn't fail on expiration
+    } catch (error) {
+      throw error;
+    }
+
+    // Your clean, explicit date check logic
+    if (decodedToken && decodedToken.exp) {
+      const expiresAt = new Date(decodedToken.exp * 1000);
+
+      if (expiresAt.getTime() < Date.now()) {
+        return next(
+          new AppError(
+            ERROR_CODES.TOKEN_EXPIRED,
+            402,
+            RESPONSE_MESSAGES[ERROR_CODES.TOKEN_EXPIRED],
+          ),
+        );
+      }
+    }
+
+    req.body = req.body || {};
+    req.body.email = decodedToken.email;
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+</file>
+
+<file path="middlewares/notFound.middleware.js">
+import AppError from '../errors/appError.error.js';
+import ERROR_CODES from '../constants/errorCodes.constant.js';
+import RESPONSE_MESSAGES from '../constants/responseMessages.constant.js';
+
+const notFound = (req, res, next) => {
+  next(
+    new AppError(RESPONSE_MESSAGES[ERROR_CODES.NOT_FOUND], 404, ERROR_CODES.NOT_FOUND),
+  );
+};
+
+export default notFound;
+</file>
+
+<file path="middlewares/rateLimit.middleware.js">
+import AppError from '../errors/appError.error.js';
+import ERROR_CODES from '../constants/errorCodes.constant.js';
+import {
+  globalLimiterConfig,
+  authLimiterConfig,
+  registerLimiterConfig,
+  emailSpamLimiterConfig,
+} from '../config/rateLimit.config.js';
+import RESPONSE_MESSAGES from '../constants/responseMessages.constant.js';
+
+const createRateLimiterMiddleware = (config) => {
+  return async (req, res, next) => {
+    try {
+      const targetIdentifier = req.body?.email || 'anonymous';
+      const clientKey = `${req.ip}:${targetIdentifier}`;
+
+      const { totalHits, resetTime } = await config.store.increment(clientKey);
+
+      if (config.standardHeaders === 'draft-8') {
+        res.setHeader('RateLimit-Limit', config.limit);
+        res.setHeader('RateLimit-Remaining', Math.max(0, config.limit - totalHits));
+
+        const deltaSeconds = Math.ceil((resetTime.getTime() - Date.now()) / 1000);
+        res.setHeader('RateLimit-Reset', Math.max(0, deltaSeconds));
+      }
+
+      if (totalHits > config.limit) {
+        const retryAfter = Math.ceil((resetTime.getTime() - Date.now()) / 1000);
+        res.setHeader('Retry-After', Math.max(0, retryAfter));
+
+        throw new AppError(
+          RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+          429,
+          ERROR_CODES.RATELIMIT,
+        );
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+export const globalRateLimit = createRateLimiterMiddleware(globalLimiterConfig);
+export const authRateLimit = createRateLimiterMiddleware(authLimiterConfig);
+export const registerRateLimit = createRateLimiterMiddleware(registerLimiterConfig);
+export const emailSpamRateLimit = createRateLimiterMiddleware(emailSpamLimiterConfig);
+</file>
+
+<file path="middlewares/uploadPicture.js">
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import sharp from 'sharp'; // Make sure sharp is imported!
+import AppError from '../errors/appError.error.js';
+import ERROR_CODES from '../constants/errorCodes.constant.js';
+import RESPONSE_MESSAGES from '../constants/responseMessages.constant.js';
+
+const UPLOAD_DIR = 'uploads';
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // Exactly 1MB Limit
+
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+const storage = multer.memoryStorage();
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+
+  if (!allowedTypes.includes(file.mimetype)) {
+    return cb(new Error('INVALID_FORMAT'), false);
+  }
+  cb(null, true);
+};
+
+const upload = multer({
+  storage,
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter,
+});
+
+export const uploadSingleAvatar = (req, res, next) => {
+  // FIX 2: Added 'async' right here before (err)
+  upload.single('avatar')(req, res, async (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        return next(
+          new AppError(
+            RESPONSE_MESSAGES[ERROR_CODES.LIMIT_UNEXPECTED_AVATAR] ||
+              'You can only upload a maximum of 1 avatar image.',
+            400,
+            ERROR_CODES.LIMIT_UNEXPECTED_AVATAR || 'LIMIT_UNEXPECTED_FILE',
+          ),
+        );
+      }
+
+      if (err.message === 'INVALID_FORMAT') {
+        return next(
+          new AppError(
+            RESPONSE_MESSAGES[ERROR_CODES.AVATAR_FORMAT] || 'Invalid file format.',
+            400,
+            ERROR_CODES.AVATAR_FORMAT,
+          ),
+        );
+      }
+
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        const errorCode = ERROR_CODES.AVATAR_SIZE || 'AVATAR_LIMIT_ERROR';
+        const message = RESPONSE_MESSAGES[errorCode] || 'File is too large.';
+        return next(new AppError(message, 400, errorCode));
+      }
+
+      if (err.code === 'ENOSPC') {
+        return next(
+          new AppError(
+            'Server storage space is full. Unable to process upload.',
+            507,
+            'SERVER_STORAGE_FULL',
+          ),
+        );
+      }
+
+      return next(
+        new AppError(
+          RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
+          500,
+          ERROR_CODES.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+
+    if (req.file) {
+      try {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const filename = `${req.file.fieldname || 'avatar'}-${uniqueSuffix}${path.extname(req.file.originalname)}`;
+        const outputPath = path.join(UPLOAD_DIR, filename);
+
+        await sharp(req.file.buffer)
+          .withMetadata({ strip: true }) // Strips EXIF, ICC profiles, XMP, etc.
+          .toFile(outputPath);
+
+        req.file.path = outputPath;
+        req.file.filename = filename;
+      } catch (sharpError) {
+        if (sharpError.code === 'ENOSPC') {
+          return next(
+            new AppError('Server storage space is full.', 507, 'SERVER_STORAGE_FULL'),
+          );
+        }
+        return next(
+          new AppError(
+            'Failed to process and clean image metadata.',
+            400,
+            'IMAGE_PROCESSING_FAILED',
+          ),
+        );
+      }
+    }
+
+    next();
+  });
+};
+
+export default uploadSingleAvatar;
+</file>
+
+<file path="middlewares/validate.middleware.js">
+import ERROR_CODES from '../constants/errorCodes.constant.js';
+import AppError from '../errors/appError.error.js';
+import RESPONSE_MESSAGES from '../constants/responseMessages.constant.js';
+
+const validate = (schema) => (req, res, next) => {
+  const { error, value } = schema.validate(
+    {
+      body: req.body,
+      params: req.params,
+      query: req.query,
+    },
+    {
+      abortEarly: false,
+      allowUnknown: true,
+    },
+  );
+
+  if (error) {
+    const errorCode = error.details[0].message || ERROR_CODES.BAD_REQUEST;
+    const userFriendlyMessage = RESPONSE_MESSAGES[errorCode] || 'Invalid input data.';
+
+    return next(new AppError(userFriendlyMessage, 400, errorCode));
+  }
+
+  if (value.body) req.body = value.body;
+  if (value.params) req.params = value.params;
+  if (value.query) {
+    Object.keys(req.query).forEach((key) => delete req.query[key]);
+    Object.assign(req.query, value.query);
+  }
+  next();
+};
+
+export default validate;
+</file>
+
+<file path="models/ActivationToken.model.js">
+import mongoose from 'mongoose';
+
+const activationTokenSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
+
+    token: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+
+    expiresAt: {
+      type: Date,
+      required: true,
+      index: { expires: 0 },
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const ActivationToken = mongoose.model('ActivationToken', activationTokenSchema);
+
+export default ActivationToken;
+</file>
+
+<file path="models/ResetToken.model.js">
+import mongoose from 'mongoose';
+
+const resetTokenSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
+
+    token: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+
+    expiresAt: {
+      type: Date,
+      required: true,
+      index: { expires: 0 },
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const ResetToken = mongoose.model('ResetToken', resetTokenSchema);
+
+export default ResetToken;
+</file>
+
+<file path="models/Session.model.js">
+import mongoose from 'mongoose';
+
+const sessionschema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
+
+    userAgent: {
+      type: String,
+      default: 'Unknown agent device', // Fixed typo: default & Unknown
+    },
+
+    deviceIp: {
+      type: String,
+      default: 'Unknown ip device', // Fixed typo: Unknown
+    },
+
+    expiresAt: {
+      type: Date,
+      required: true,
+      index: { expireAfterSeconds: 0 },
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  },
+);
+
+sessionschema.index({ userId: 1, deviceIp: 1, userAgent: 1 }, { unique: true });
+
+const Session = mongoose.model('Session', sessionschema);
+
+export default Session;
+</file>
+
+<file path="models/User.model.js">
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import Session from './session.model.js';
+import ResetToken from './resetToken.model.js';
+import ActivationToken from './activationToken.model.js';
+
+const userSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      minlength: 3,
+      maxlength: 20,
+      index: true,
+    },
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 20,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 20,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [/^\S+@\S+\.\S+$/, 'Invalid email format'],
+      index: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 8,
+      select: false,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
+    lastLoginAt: {
+      type: Date,
+      default: null,
+    },
+    status: {
+      type: String,
+      enum: ['active', 'suspended', 'banned'],
+      default: 'active',
+      index: true,
+    },
+    bio: {
+      type: String,
+      maxlength: 250,
+      default: '',
+    },
+    avatar: {
+      type: String,
+      default: null,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
+      index: true,
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  },
+);
+
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.methods.toJSON = function () {
+  const obj = this.toObject();
+  delete obj.password;
+  return obj;
+};
+
+userSchema.pre(/^find/, function () {
+  this.where({ deletedAt: null });
+});
+
+userSchema.methods.softDelete = function () {
+  this.deletedAt = new Date();
+  return this.save();
+};
+
+userSchema.statics.findActiveById = function (id, projection = null) {
+  return this.findOne({ _id: id, emailVerified: true, deletedAt: null }, projection);
+};
+
+userSchema.pre('save', async function (next) {
+  if (this.isModified('deletedAt') && this.deletedAt !== null) {
+    const userId = this._id;
+
+    await Promise.all([
+      Session.deleteMany({ userId }),
+      ResetToken.deleteMany({ user: userId }),
+      ActivationToken.deleteMany({ user: userId }),
+    ]);
+  }
+  next();
+});
+
+userSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+  const userId = this._id;
+
+  await Promise.all([
+    Session.deleteMany({ userId }),
+    ResetToken.deleteMany({ user: userId }),
+    ActivationToken.deleteMany({ user: userId }),
+  ]);
+  next();
+});
+
+const User = mongoose.model('User', userSchema);
+export default User;
+</file>
+
+<file path="routes/advance.router.js">
+import { Router } from 'express';
+import protect from '../middlewares/auth.middleware.js';
+
+const advRouter = Router();
+
+advRouter.get('/test', protect, (req, res) => {
+  const { accessToken, userId, oldToken } = req;
+
+  res.json({
+    success: true,
+    message: 'ok next',
+    accessToken,
+    userId,
+    oldToken,
+  });
+});
+
+export default advRouter;
+</file>
+
+<file path="routes/auth.router.js">
+import { Router } from 'express';
+import uploadSingleAvatar from '../middlewares/uploadPicture.js';
+import validate from '../middlewares/validate.middleware.js';
+
+import registerValidator from '../validators/auth/register.validator.js';
+import registerController from '../controllers/auth/register.controller.js';
+
+import activationController from '../controllers/auth/activation.controller.js';
+import activationValidator from '../validators/auth/activation.validator.js';
+
+import resendActivationValidator from '../validators/auth/resendActivation.validator.js';
+import resendActivationController from '../controllers/auth/resendActivation.controller.js';
+
+import loginValidator from '../validators/auth/login.validator.js';
+import loginController from '../controllers/auth/login.controller.js';
+import logoutController from '../controllers/auth/logout.controller.js';
+import logoutFromAllController from '../controllers/auth/logoutFromAll.controller.js';
+
+import forgetPasswordValidator from '../validators/auth/forgetPassword.validator.js';
+import forgetPasswordController from '../controllers/auth/forgetPassword.controller.js';
+import resendForgetPasswordController from '../controllers/auth/resendForgetPassword.controller.js';
+import resetPasswordValidator from '../validators/auth/resetPassword.validator.js';
+import resetPasswordController from '../controllers/auth/resetPassword.controller.js';
+
+import {
+  authRateLimit,
+  registerRateLimit,
+  emailSpamRateLimit,
+} from '../middlewares/rateLimit.middleware.js';
+
+const authRouter = Router();
+
+authRouter.get('/ping', (req, res) => {
+  res.json({ success: true, message: 'auth service up' });
+});
+
+authRouter.post(
+  '/register',
+  registerRateLimit,
+  uploadSingleAvatar,
+  validate(registerValidator),
+  registerController,
+);
+
+authRouter.get('/activate/:token', validate(activationValidator), activationController);
+
+authRouter.post(
+  '/resend-activate',
+  emailSpamRateLimit,
+  validate(resendActivationValidator),
+  resendActivationController,
+);
+
+authRouter.post('/login', authRateLimit, validate(loginValidator), loginController);
+
+authRouter.get('/logout', logoutController);
+
+authRouter.get('/logoutFromAll', logoutFromAllController);
+
+authRouter.post(
+  '/forget-password',
+  emailSpamRateLimit,
+  validate(forgetPasswordValidator),
+  forgetPasswordController,
+);
+
+authRouter.get(
+  '/resend-forget-password',
+  emailSpamRateLimit,
+  resendForgetPasswordController,
+);
+
+authRouter.post(
+  '/reset-password',
+  authRateLimit,
+  validate(resetPasswordValidator),
+  resetPasswordController,
+);
+
+export default authRouter;
+</file>
+
+<file path="services/domain/user.service.js">
+import User from '../../models/User.model.js';
+
+export const findUserWithPasswordById = async (userId) => {
+  return await User.findById(userId).select('id role status +password');
+};
+export const findUserByUsername = async (username) => {
+  return await User.findOne({ username });
+};
+
+export const findUserByEmail = async (email) => {
+  return await User.findOne({ email }).select(
+    'username email status role emailVerified',
+  );
+};
+
+export const createUser = async (data) => {
+  try {
+    return await User.create(data);
+  } catch (err) {
+    console.error('Error in createUser:', err);
+    throw err;
+  }
+};
+
+export const activateAccount = async (userId) => {
+  return User.findByIdAndUpdate(userId, { emailVerified: true }, { new: true }).select(
+    'userId,emailVerified',
+  );
+};
+
+export const findUserActivationStatus = async (userId) => {
+  return await User.findById(userId).select('emailVerified role status');
+};
+
+export const findUserWithPasswordByEmail = async (email) => {
+  return await User.findOne({ email }).select(
+    'id username role email status emailVerified +password',
+  );
+};
+
+export const resetPasswordByUser = async (userId, hashedPassword) => {
+  await User.findByIdAndUpdate(userId, { password: hashedPassword }, { new: true });
+};
+</file>
+
+<file path="services/JWT/jwt.service.js">
+import Session from '../../models/session.model.js';
+
+export const createSession = async (userId, userAgent, deviceIp, expiresAt) => {
+  await Session.deleteMany({
+    userId,
+    deviceIp,
+    userAgent,
+  });
+
+  return await Session.create({
+    userId,
+    deviceIp,
+    userAgent,
+    expiresAt,
+  });
+};
+
+export const findSessionById = async (sessionId) => {
+  return await Session.findById(sessionId);
+};
+
+export const logout = async (sessionId) => {
+  return await Session.findByIdAndDelete(sessionId);
+};
+
+export const logoutFromAll = async (userId) => {
+  return await Session.deleteMany({ userId: userId });
+};
+</file>
+
+<file path="services/mail/templates/activation.service.js">
+const activationTemplate = ({ username, activationLink }) => {
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate Your Account</title>
+  </head>
+  <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f7; margin: 0; padding: 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+      <tr>
+        <td style="padding: 30px; text-align: center; background-color: #4a90e2; color: #ffffff;">
+          <h1 style="margin: 0; font-size: 28px;">Welcome, ${username}!</h1>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 30px; color: #333333; font-size: 16px; line-height: 1.6;">
+          <p>Thank you for signing up. Please activate your account by clicking the button below:</p>
+          <p style="text-align: center; margin: 30px 0;">
+            <a href="${activationLink}" style="background-color: #4a90e2; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 5px; display: inline-block; font-weight: bold;">Activate Account</a>
+          </p>
+          <p>This activation link will expire in <strong>24 hours</strong>. If you did not sign up, please ignore this email.</p>
+          <p>Cheers,<br/>The Team</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa; background-color: #f4f4f7;">
+          &copy; ${new Date().getFullYear()} Your Company. All rights reserved.
+        </td>
+      </tr>
+    </table>
+  </body>
+  </html>
+  `;
+};
+
+export default activationTemplate;
+</file>
+
+<file path="services/mail/templates/reset.service.js">
+export const resetTemplate = ({ username, rawToken }) => {
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Your Password</title>
+  </head>
+  <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f7; margin: 0; padding: 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+      <tr>
+        <td style="padding: 30px; text-align: center; background-color: #4a90e2; color: #ffffff;">
+          <h1 style="margin: 0; font-size: 28px;">Password Reset Request</h1>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 30px; color: #333333; font-size: 16px; line-height: 1.6;">
+          <p>Hello ${username},</p>
+          <p>We received a request to reset your password. Use the verification code below to proceed:</p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <div style="
+              display: inline-block;
+              background-color: #f4f4f7;
+              border: 2px dashed #4a90e2;
+              color: #333333;
+              font-size: 26px;
+              font-weight: bold;
+              letter-spacing: 6px;
+              padding: 15px 40px;
+              border-radius: 8px;
+            ">
+              ${rawToken}
+            </div>
+          </div>
+
+          <p>This code will expire in <strong>10 minutes</strong> for security reasons. If you didn't request a password reset, you can safely ignore this email.</p>
+          <p>Cheers,<br/>The Team</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa; background-color: #f4f4f7;">
+          &copy; ${new Date().getFullYear()} Your Company. All rights reserved.
+        </td>
+      </tr>
+    </table>
+  </body>
+  </html>
+  `;
+};
+
+export default resetTemplate;
+</file>
+
+<file path="services/mail/mail.service.js">
+import nodemailer from 'nodemailer';
+import mailConfig from '../../config/mail.config.js';
+
+import activationTemplate from './templates/activation.service.js';
+import resetTemplate from './templates/reset.service.js';
+
+import TYPE_MAIL from '../../constants/typesMail.constant.js';
+import MAIL_SUBJECTS from '../../constants/mailSubjects.constant.js';
+// import ERROR_CODES from "../../constants/errorCodes.constant.js";
+
+export const sendTypedMail = async ({ type, to, payload }) => {
+  const template = {
+    [TYPE_MAIL.ACTIVATION]: {
+      subject: MAIL_SUBJECTS.ACTIVATION,
+      render: activationTemplate,
+    },
+    [TYPE_MAIL.RESET]: {
+      subject: MAIL_SUBJECTS.RESET,
+      render: resetTemplate,
+    },
+  }[type];
+
+  if (!template) throw new Error('MAIL_TYPE_NOT_ALLOWED');
+
+  console.log('📨 Sending mail to:', to);
+
+  const transporter = nodemailer.createTransport({
+    host: mailConfig.host,
+    port: mailConfig.port,
+    secure: mailConfig.secure,
+    auth: mailConfig.auth,
+  });
+
+  const htmlContent = template.render(payload);
+
+  try {
+    const info = await transporter.sendMail({
+      from: mailConfig.from,
+      to,
+      subject: template.subject,
+      html: htmlContent,
+    });
+
+    return info;
+  } catch (err) {
+    throw err;
+  }
+};
+</file>
+
+<file path="services/token/Token.service.js">
+import ActivationToken from '../../models/ActivationToken.model.js';
+import ResetToken from '../../models/resetToken.model.js';
+
+export async function createActivationToken(user_id, hashedToken, expiresAt) {
+  return ActivationToken.findOneAndUpdate(
+    { user: user_id },
+    {
+      $set: {
+        token: hashedToken,
+        expiresAt: expiresAt,
+      },
+    },
+    {
+      upsert: true,
+      returnDocument: 'after',
+      setDefaultsOnInsert: true,
+    },
+  );
+}
+
+export async function createResetToken(userId, hashedToken, expiresAt) {
+  await ResetToken.deleteOne({ user: userId });
+  return await ResetToken.create({
+    user: userId,
+    token: hashedToken,
+    expiresAt: expiresAt,
+  });
+}
+
+export async function findResetTokenById(resetTokenId) {
+  return await ResetToken.findById(resetTokenId);
+}
+
+export async function findResetToken(hashedToken) {
+  return await ResetToken.findOne({ token: hashedToken });
+}
+
+export async function deleteResetTokensByUser(userId) {
+  await ResetToken.deleteMany({ user: userId });
+}
+
+export async function deleteResetTokenByToken(hashedToken) {
+  await ResetToken.deleteOne({ token: hashedToken });
+}
+
+export async function findActivationToken(hashedToken) {
+  return await ActivationToken.findOne({ token: hashedToken });
+}
+
+export async function deleteActivationTokenByToken(hashedToken) {
+  return await ActivationToken.deleteOne({ token: hashedToken });
+}
+
+export async function deleteActivationTokensByUser(userId) {
+  await ActivationToken.deleteMany({ user: userId });
+}
+</file>
+
+<file path="services/auth.service.js">
+import AppError from '../../errors/appError.error.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import User from '../../models/User.model.js';
+
+export const validateAuthUser = async (decoded) => {
+  const user = await User.findActiveById(decoded.id);
+
+  if (!user) {
+    throw new AppError(ERROR_CODES.UNAUTHORIZED, 401);
+  }
+
+  if (user.deletedAt) {
+    throw new AppError(ERROR_CODES.UNAUTHORIZED, 401);
+  }
+
+  if (!user.emailVerified) {
+    throw new AppError(ERROR_CODES.FORBIDDEN, 403);
+  }
+
+  return user;
+};
+
+export default validateAuthUser;
+</file>
+
+<file path="useCases/auth/activate.useCase.js">
+import AppError from '../../errors/appError.error.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import {
+  findActivationToken,
+  deleteActivationTokenByToken,
+} from '../../services/token/Token.service.js';
+import {
+  activateAccount,
+  findUserActivationStatus,
+} from '../../services/domain/user.service.js';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import hashToken from '../../utils/hashToken.util.js';
+
+export const activateUseCase = async (rawToken) => {
+  try {
+    if (!rawToken) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.ACTIVATION_TOKEN_INVALID,
+      );
+    }
+
+    const hashedToken = hashToken(rawToken);
+    const tokenRecord = await findActivationToken(hashedToken);
+
+    if (!tokenRecord) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.ACTIVATION_TOKEN_NOT_FOUND,
+      );
+    }
+
+    if (tokenRecord.expiresAt.getTime() < Date.now()) {
+      await tokenRecord.deleteOne();
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.ACTIVATION_TOKEN_EXPIRED],
+        400,
+        ERROR_CODES.ACTIVATION_TOKEN_EXPIRED,
+      );
+    }
+
+    await deleteActivationTokenByToken(hashedToken);
+    const user = await findUserActivationStatus(tokenRecord.user);
+
+    if (!user) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        404,
+        ERROR_CODES.USER_NOT_FOUND,
+      );
+    }
+
+    if (user.emailVerified) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.ACCOUNT_ALREADY_ACTIVATED],
+        400,
+        ERROR_CODES.ACCOUNT_ALREADY_ACTIVATED,
+      );
+    }
+
+    if (user.status === 'banned') {
+      throw new AppError(RESPONSE_MESSAGES[ERROR_CODES.BANNED], 403, ERROR_CODES.BANNED);
+    }
+
+    if (user.status === 'suspended') {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SUSPENDED],
+        403,
+        ERROR_CODES.SUSPENDED,
+      );
+    }
+
+    const activatedUser = await activateAccount(tokenRecord.user);
+
+    return {
+      user: activatedUser,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default activateUseCase;
+</file>
+
+<file path="useCases/auth/auth.UseCase.js">
+import AppError from '../../errors/appError.error.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import env from '../../config/env.config.js';
+import generateJWT from '../../utils/generateJWT.util.js';
+import decodeJWT from '../../utils/decodeJWT.util.js';
+import {
+  findSessionById,
+  logout,
+  logoutFromAll,
+} from '../../services/JWT/jwt.service.js';
+import { findUserWithPasswordById } from '../../services/domain/user.service.js';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+
+export const authUseCase = async (token) => {
+  try {
+    const decoded = decodeJWT(token);
+
+    const { userId, role, sessionId, exp } = decoded;
+
+    if (!userId) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.UESR_ID_INVALID,
+      );
+    }
+
+    if (!role) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.ROLE_INVALID,
+      );
+    }
+
+    if (!sessionId) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.SESSION_INVALID,
+      );
+    }
+
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    if (exp && exp > currentTime) {
+      return { accessToken: token, userId, isNew: false };
+    }
+
+    const session = await findSessionById(sessionId);
+
+    if (!session) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SESSION_EXPIRED],
+        401,
+        ERROR_CODES.SESSION_NOT_FOUND,
+      );
+    }
+
+    if (session.expiresAt.getTime() < Date.now()) {
+      await logout(sessionId);
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SESSION_EXPIRED],
+        401,
+        ERROR_CODES.SESSION_EXPIRED,
+      );
+    }
+
+    const user = await findUserWithPasswordById(userId);
+
+    if (!user) {
+      await logoutFromAll(userId);
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        404,
+        ERROR_CODES.USER_NOT_FOUND,
+      );
+    }
+
+    if (user.status === 'banned') {
+      await logout(sessionId);
+      throw new AppError(RESPONSE_MESSAGES[ERROR_CODES.BANNED], 403, ERROR_CODES.BANNED);
+    }
+
+    if (user.status === 'suspended') {
+      await logout(sessionId);
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SUSPENDED],
+        403,
+        ERROR_CODES.SUSPENDED,
+      );
+    }
+
+    if (user.role !== role) {
+      await logout(sessionId);
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        403,
+        ERROR_CODES.ROLE_WAS_CHANGE,
+      );
+    }
+
+    const accessPayload = { userId, role, sessionId };
+    const accessExpire = Number(env.JWT_EXPIRES);
+    const accessToken = generateJWT(accessPayload, accessExpire);
+
+    return { accessToken, userId, isNew: true };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default authUseCase;
+</file>
+
+<file path="useCases/auth/forgetPassword.useCase.js">
+import AppError from '../../errors/appError.error.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import { findUserByEmail } from '../../services/domain/user.service.js';
+import { createResetToken } from '../../services/token/Token.service.js';
+import generateRandomToken from '../../utils/generateRandomToken.utils.js';
+import { sendTypedMail } from '../../services/mail/mail.service.js';
+import TYPE_MAIL from '../../constants/typesMail.constant.js';
+import env from '../../config/env.config.js';
+import generateJWT from '../../utils/generateJWT.util.js';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+
+export const forgetPasswordUseCase = async (email) => {
+  try {
+    const user = await findUserByEmail(email);
+
+    if (!user) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        404,
+        ERROR_CODES.USER_NOT_FOUND,
+      );
+    }
+
+    if (!user.emailVerified) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.ACCOUNT_NOT_ACTIVATED],
+        400,
+        ERROR_CODES.ACCOUNT_NOT_ACTIVATED,
+      );
+    }
+
+    if (user.status === 'banned') {
+      throw new AppError(RESPONSE_MESSAGES[ERROR_CODES.BANNED], 403, ERROR_CODES.BANNED);
+    }
+
+    if (user.status === 'suspended') {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SUSPENDED],
+        403,
+        ERROR_CODES.SUSPENDED,
+      );
+    }
+
+    const userId = user._id;
+    const role = user.role;
+    const userEmail = user.email;
+    const expiresAt = Date.now() + Number(env.RESET_TOKEN_EXPIRES) * 1000;
+    const length = Number(env.LENGTH_RESET_TOKEN);
+
+    const { rawToken, hashedToken } = generateRandomToken(length);
+    const resetToken = await createResetToken(userId, hashedToken, expiresAt);
+
+    const expire = Number(env.JWT_RESEND_EXPIRES);
+    const resetTokenId = resetToken._id;
+    const payload = { userId, userEmail, role, resetTokenId };
+
+    const resendToken = generateJWT(payload, expire);
+    await sendTypedMail({
+      type: TYPE_MAIL.RESET,
+      to: user.email,
+      payload: {
+        username: user.username,
+        rawToken,
+      },
+    });
+
+    return { rawToken, resendToken };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default forgetPasswordUseCase;
+</file>
+
+<file path="useCases/auth/login.useCase.js">
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import { findUserWithPasswordByEmail } from '../../services/domain/user.service.js';
+import AppError from '../../errors/appError.error.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import comparePassword from '../../utils/comparePassword.util.js';
+import env from '../../config/env.config.js';
+import generateJWT from '../../utils/generateJWT.util.js';
+import { createSession } from '../../services/JWT/jwt.service.js';
+
+export const loginUseCase = async (data) => {
+  try {
+    const { ip, email, password, userAgent } = data;
+
+    if (!email) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.EMAIL_REQUIRED],
+        409,
+        ERROR_CODES.EMAIL_REQUIRED,
+      );
+    }
+
+    if (!password) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.PASSWORD_REQUIRED],
+        409,
+        ERROR_CODES.PASSWORD_REQUIRED,
+      );
+    }
+
+    const user = await findUserWithPasswordByEmail(email);
+
+    if (!user) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        404,
+        ERROR_CODES.USER_NOT_FOUND,
+      );
+    }
+
+    if (!user.emailVerified) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.ACCOUNT_NOT_ACTIVATED],
+        400,
+        ERROR_CODES.ACCOUNT_NOT_ACTIVATED,
+      );
+    }
+
+    if (user.status === 'banned') {
+      throw new AppError(RESPONSE_MESSAGES[ERROR_CODES.BANNED], 403, ERROR_CODES.BANNED);
+    }
+
+    if (user.status === 'suspended') {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SUSPENDED],
+        403,
+        ERROR_CODES.SUSPENDED,
+      );
+    }
+
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) {
+      throw new AppError(ERROR_CODES.LOGIN_FAILED, 400);
+    }
+
+    const { _id: userId, role } = user;
+
+    const daysToExpire = 30;
+    const expiresAt = new Date(Date.now() + daysToExpire * 24 * 60 * 60 * 1000);
+
+    const savedSession = await createSession(userId, userAgent, ip, expiresAt);
+    const sessionId = savedSession._id;
+
+    const accessPayload = {
+      userId,
+      role,
+      sessionId,
+    };
+
+    const accessExpire = Number(env.JWT_EXPIRES);
+    const accessToken = generateJWT(accessPayload, accessExpire);
+
+    return {
+      accessToken,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default loginUseCase;
+</file>
+
+<file path="useCases/auth/logout.useCase.js">
+import {
+  findSessionById,
+  logout,
+  logoutFromAll,
+} from '../../services/JWT/jwt.service.js';
+import { findUserWithPasswordById } from '../../services/domain/user.service.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import AppError from '../../errors/appError.error.js';
+import decodeJWT from '../../utils/decodeJWT.util.js';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+
+export const logoutUseCase = async (token) => {
+  const decoded = decodeJWT(token);
+  const { userId, role, sessionId } = decoded;
+
+  if (!userId) {
+    throw new AppError(
+      RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+      401,
+      ERROR_CODES.UESR_ID_INVALID,
+    );
+  }
+
+  if (!role) {
+    throw new AppError(
+      RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+      401,
+      ERROR_CODES.ROLE_INVALID,
+    );
+  }
+
+  if (!sessionId) {
+    throw new AppError(
+      RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+      401,
+      ERROR_CODES.SESSION_INVALID,
+    );
+  }
+
+  const session = await findSessionById(sessionId);
+
+  if (!session) {
+    throw new AppError(
+      RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+      401,
+      ERROR_CODES.SESSION_INVALID,
+    );
+  }
+
+  const user = await findUserWithPasswordById(userId);
+
+  if (!user) {
+    await logoutFromAll(userId);
+    throw new AppError(
+      RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+      401,
+      ERROR_CODES.USER_NOT_FOUND,
+    );
+  }
+
+  return await logout(sessionId);
+};
+export default logoutUseCase;
+</file>
+
+<file path="useCases/auth/logoutFromAll.useCase.js">
+import {
+  findSessionById,
+  logout,
+  logoutFromAll,
+} from '../../services/JWT/jwt.service.js';
+import { findUserWithPasswordById } from '../../services/domain/user.service.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import AppError from '../../errors/appError.error.js';
+import decodeJWT from '../../utils/decodeJWT.util.js';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+
+export const logoutFromAllUseCase = async (token) => {
+  try {
+    const decoded = decodeJWT(token);
+    const { userId, role, sessionId, exp } = decoded;
+
+    if (!userId) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.UESR_ID_INVALID,
+      );
+    }
+
+    if (!role) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.ROLE_INVALID,
+      );
+    }
+
+    if (!sessionId) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.SESSION_INVALID,
+      );
+    }
+
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    if (exp && exp <= currentTime) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.JWT_EXPIRED],
+        401,
+        ERROR_CODES.JWT_EXPIRED,
+      );
+    }
+
+    const session = await findSessionById(sessionId);
+
+    if (!session) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.SESSION_INVALID,
+      );
+    }
+
+    if (session.expiresAt.getTime() < Date.now()) {
+      await logout(sessionId);
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SESSION_EXPIRED],
+        401,
+        ERROR_CODES.SESSION_EXPIRED,
+      );
+    }
+
+    const user = await findUserWithPasswordById(userId);
+
+    if (!user) {
+      await logoutFromAll(userId);
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.USER_NOT_FOUND,
+      );
+    }
+
+    if (user.status === 'banned') {
+      await logout(sessionId);
+      throw new AppError(RESPONSE_MESSAGES[ERROR_CODES.BANNED], 403, ERROR_CODES.BANNED);
+    }
+
+    if (user.status === 'suspended') {
+      await logout(sessionId);
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SUSPENDED],
+        403,
+        ERROR_CODES.SUSPENDED,
+      );
+    }
+
+    if (user.role !== role) {
+      await logout(sessionId);
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        403,
+        ERROR_CODES.ROLE_WAS_CHANGE,
+      );
+    }
+
+    return await logoutFromAll(userId);
+  } catch (error) {
+    throw error;
+  }
+};
+export default logoutFromAllUseCase;
+</file>
+
+<file path="useCases/auth/register.useCase.js">
+import AppError from '../../errors/appError.error.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import {
+  findUserByUsername,
+  findUserByEmail,
+  createUser,
+} from '../../services/domain/user.service.js';
+
+import { sendTypedMail } from '../../services/mail/mail.service.js';
+import { createActivationToken } from '../../services/token/Token.service.js';
+
+import TYPE_MAIL from '../../constants/typesMail.constant.js';
+import env from '../../config/env.config.js';
+import hashPassword from '../../utils/hashPassword.util.js';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import generateRandomToken from '../../utils/generateRandomToken.utils.js';
+
+export const registerUseCase = async (data) => {
+  try {
+    const { username, email, password, firstName, lastName } = data;
+
+    if (await findUserByUsername(username)) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.USERNAME_ALREADY_EXISTS],
+        409,
+        ERROR_CODES.USERNAME_ALREADY_EXISTS,
+      );
+    }
+
+    if (await findUserByEmail(email)) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.EMAIL_ALREADY_EXISTS],
+        409,
+        ERROR_CODES.EMAIL_ALREADY_EXISTS,
+      );
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    const user = await createUser({
+      username,
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
+
+    const expiresAt = Date.now() + Number(env.ACTIVATION_TOKEN_EXPIRES) * 1000;
+    const length = Number(env.LENGTH_ACTIVATION_TOKEN);
+
+    const { rawToken, hashedToken } = generateRandomToken(length);
+
+    await createActivationToken(user._id, hashedToken, expiresAt);
+
+    const activationLink = `${env.APP_URL}/activate/${rawToken}`;
+
+    await sendTypedMail({
+      type: TYPE_MAIL.ACTIVATION,
+      to: user.email,
+      payload: {
+        username: user.username,
+        activationLink,
+      },
+    });
+
+    return {
+      username: user.username,
+      link: activationLink,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default registerUseCase;
+</file>
+
+<file path="useCases/auth/resendActivation.useCase.js">
+import AppError from '../../errors/appError.error.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import { findUserByEmail } from '../../services/domain/user.service.js';
+import { createActivationToken } from '../../services/token/Token.service.js';
+import generateRandomToken from '../../utils/generateRandomToken.utils.js';
+import { sendTypedMail } from '../../services/mail/mail.service.js';
+import env from '../../config/env.config.js';
+import TYPE_MAIL from '../../constants/typesMail.constant.js';
+
+export const resendActivationUseCase = async (email) => {
+  try {
+    if (!email) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.EMAIL_REQUIRED],
+        409,
+        ERROR_CODES.EMAIL_REQUIRED,
+      );
+    }
+
+    const user = await findUserByEmail(email);
+
+    if (!user) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        404,
+        ERROR_CODES.USER_NOT_FOUND,
+      );
+    }
+
+    if (user.emailVerified) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.ACCOUNT_ALREADY_ACTIVATED],
+        400,
+        ERROR_CODES.ACCOUNT_ALREADY_ACTIVATED,
+      );
+    }
+
+    if (user.status === 'banned') {
+      throw new AppError(RESPONSE_MESSAGES[ERROR_CODES.BANNED], 403, ERROR_CODES.BANNED);
+    }
+
+    if (user.status === 'suspended') {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SUSPENDED],
+        403,
+        ERROR_CODES.SUSPENDED,
+      );
+    }
+
+    const expiresAt = Date.now() + Number(env.ACTIVATION_TOKEN_EXPIRES) * 1000;
+    const length = Number(env.LENGTH_ACTIVATION_TOKEN);
+
+    const { rawToken, hashedToken } = generateRandomToken(length);
+
+    await createActivationToken(user._id, hashedToken, expiresAt);
+
+    const activationLink = `${env.APP_URL}/activate/${rawToken}`;
+
+    await sendTypedMail({
+      type: TYPE_MAIL.ACTIVATION,
+      to: user.email,
+      payload: {
+        username: user.username,
+        activationLink,
+      },
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default resendActivationUseCase;
+</file>
+
+<file path="useCases/auth/resendForgetPassword.useCase.js">
+import AppError from '../../errors/appError.error.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import { findUserByEmail } from '../../services/domain/user.service.js';
+import {
+  createResetToken,
+  findResetTokenById,
+} from '../../services/token/Token.service.js';
+
+import generateRandomToken from '../../utils/generateRandomToken.utils.js';
+import { sendTypedMail } from '../../services/mail/mail.service.js';
+import TYPE_MAIL from '../../constants/typesMail.constant.js';
+import env from '../../config/env.config.js';
+import decodeJWT from '../../utils/decodeJWT.util.js';
+import { Redis } from '@upstash/redis';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+
+export const redisClient = Redis.fromEnv();
+
+export const resendForgetPasswordUseCase = async (token) => {
+  try {
+    const decoded = decodeJWT(token);
+
+    const { userId, userEmail, role, resetTokenId, exp } = decoded;
+
+    if (!userEmail) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.EMAIL_INVALID,
+      );
+    }
+
+    if (!role) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.ROLE_INVALID,
+      );
+    }
+
+    if (!resetTokenId) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.JWT_INVALID,
+      );
+    }
+
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    if (exp && exp <= currentTime) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.JWT_EXPIRED],
+        401,
+        ERROR_CODES.JWT_EXPIRED,
+      );
+    }
+
+    const reset = await findResetTokenById(resetTokenId);
+
+    if (!reset) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.TOKEN_NOT_FOUND,
+      );
+    }
+
+    const user = await findUserByEmail(userEmail);
+
+    if (!user) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        404,
+        ERROR_CODES.USER_NOT_FOUND,
+      );
+    }
+
+    if (!user.emailVerified) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.ACCOUNT_NOT_ACTIVATED],
+        400,
+        ERROR_CODES.ACCOUNT_NOT_ACTIVATED,
+      );
+    }
+
+    if (user.status === 'banned') {
+      throw new AppError(RESPONSE_MESSAGES[ERROR_CODES.BANNED], 403, ERROR_CODES.BANNED);
+    }
+
+    if (user.status === 'suspended') {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SUSPENDED],
+        403,
+        ERROR_CODES.SUSPENDED,
+      );
+    }
+
+    if (user.role !== role) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        403,
+        ERROR_CODES.ROLE_WAS_CHANGE,
+      );
+    }
+
+    const expiresAt = Date.now() + Number(env.RESET_TOKEN_EXPIRES) * 1000;
+    const length = Number(env.LENGTH_RESET_TOKEN);
+    const { rawToken, hashedToken } = generateRandomToken(length);
+
+    await createResetToken(userId, hashedToken, expiresAt);
+
+    await sendTypedMail({
+      type: TYPE_MAIL.RESET,
+      to: user.email,
+      payload: {
+        username: user.username,
+        rawToken,
+      },
+    });
+
+    return { rawToken };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default resendForgetPasswordUseCase;
+</file>
+
+<file path="useCases/auth/resetPassword.useCase.js">
+import AppError from '../../errors/appError.error.js';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import RESPONSE_MESSAGES from '../../constants/responseMessages.constant.js';
+import {
+  deleteResetTokenByToken,
+  findResetToken,
+} from '../../services/token/Token.service.js';
+import hashPassword from '../../utils/hashPassword.util.js';
+import hashToken from '../../utils/hashToken.util.js';
+import {
+  resetPasswordByUser,
+  findUserWithPasswordById,
+} from '../../services/domain/user.service.js';
+import comparePassword from '../../utils/comparePassword.util.js';
+
+export const resetPasswordUseCase = async (rawToken, password) => {
+  try {
+    const hashedToken = hashToken(rawToken);
+    const tokenRecord = await findResetToken(hashedToken);
+
+    if (!tokenRecord) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        400,
+        ERROR_CODES.RESET_TOKEN_NOT_FOUND,
+      );
+    }
+
+    if (tokenRecord.expiresAt.getTime() < Date.now()) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.RESET_TOKEN_EXPIRED],
+        400,
+        ERROR_CODES.RESET_TOKEN_EXPIRED,
+      );
+    }
+
+    const user = await findUserWithPasswordById(tokenRecord.user);
+
+    if (user.status === 'banned') {
+      throw new AppError(RESPONSE_MESSAGES[ERROR_CODES.BANNED], 403, ERROR_CODES.BANNED);
+    }
+
+    if (user.status === 'suspended') {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SUSPENDED],
+        403,
+        ERROR_CODES.SUSPENDED,
+      );
+    }
+
+    const isMatch = await comparePassword(password, user.password);
+
+    if (isMatch) {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.SAME_AS_OLD_PASSWORD],
+        400,
+        ERROR_CODES.SAME_AS_OLD_PASSWORD,
+      );
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    await resetPasswordByUser(tokenRecord.user, hashedPassword);
+    await deleteResetTokenByToken(hashedToken);
+
+    return password;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default resetPasswordUseCase;
+</file>
+
+<file path="utils/comparePassword.util.js">
+import bcrypt from 'bcrypt';
+
+export const comparePassword = async (plainPassword, hashedPassword) => {
+  return bcrypt.compare(plainPassword, hashedPassword);
+};
+
+export default comparePassword;
+</file>
+
+<file path="utils/decodeJWT.util.js">
+import jwt from 'jsonwebtoken';
+import env from '../config/env.config.js';
+import AppError from '../errors/appError.error.js';
+import ERROR_CODES from '../constants/errorCodes.constant.js';
+import RESPONSE_MESSAGES from '../constants/responseMessages.constant.js';
+
+const decodeJWT = (token) => {
+  try {
+    return jwt.verify(token, env.JWT_SECRET, { ignoreExpiration: true });
+  } catch (error) {
+    if (error.message === 'invalid signature') {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        401,
+        ERROR_CODES.INVALID_SIGNATURE,
+      );
+    }
+
+    if (error.name === 'JsonWebTokenError') {
+      throw new AppError(
+        RESPONSE_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        400,
+        ERROR_CODES.JSON_WEB_TOKEN_ERROR,
+      );
+    }
+
+    throw new AppError(
+      error.message.UNAUTHORIZED,
+      500,
+      ERROR_CODES.TOKEN_VERIFICATION_FAILED,
+    );
+  }
+};
+export default decodeJWT;
+</file>
+
+<file path="utils/extractJWT.util.js">
+const extractJWT = (req) => {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    return req.headers.authorization.split(' ')[1];
+  }
+  return null;
+};
+
+export default extractJWT;
+</file>
+
+<file path="utils/generateAccessToken.util.js">
+import jwt from 'jsonwebtoken';
+import env from '../config/env.config.js';
+
+const generateJWT = (AccessPayload, AccessExpire) => {
+  return jwt.sign(AccessPayload, env.JWT_SECRET, { expiresIn: Number(AccessExpire) });
+};
+
+export default generateJWT;
+</file>
+
+<file path="utils/generateJWT.util.js">
+import jwt from 'jsonwebtoken';
+import env from '../config/env.config.js';
+
+const generateJWT = (AccessPayload, AccessExpire) => {
+  return jwt.sign(AccessPayload, env.JWT_SECRET, { expiresIn: Number(AccessExpire) });
+};
+
+export default generateJWT;
+</file>
+
+<file path="utils/generateRandomToken.utils.js">
+import generateToken from './generateToken.util.js';
+import hashToken from './hashToken.util.js';
+
+export function generateRandomToken(length) {
+  const rawToken = generateToken(length);
+  const hashedToken = hashToken(rawToken);
+  return { rawToken, hashedToken };
+}
+
+export default generateRandomToken;
+</file>
+
+<file path="utils/generateToken.util.js">
+import crypto from 'crypto';
+
+const generateToken = (length) => {
+  const rawToken = crypto.randomBytes(length).toString('hex');
+  return rawToken;
+};
+
+export default generateToken;
+</file>
+
+<file path="utils/hashPassword.util.js">
+import bcrypt from 'bcrypt';
+
+export const hashPassword = (password) => {
+  return bcrypt.hash(password, 12);
+};
+
+export default hashPassword;
+</file>
+
+<file path="utils/hashToken.util.js">
+import crypto from 'crypto';
+
+export const hashToken = (rawToken) => {
+  return crypto.createHash('sha256').update(rawToken).digest('hex');
+};
+export default hashToken;
+</file>
+
+<file path="validators/auth/activation.validator.js">
+import Joi from 'joi';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+
+const activationValidator = Joi.object({
+  params: Joi.object({
+    token: Joi.string().trim().length(64).required().messages({
+      'any.required': ERROR_CODES.ACTIVATION_TOKEN_REQUIRED,
+      'string.empty': ERROR_CODES.ACTIVATION_TOKEN_REQUIRED,
+      'string.length': ERROR_CODES.ACTIVATION_TOKEN_INVALID,
+    }),
+  }),
+});
+
+export default activationValidator;
+</file>
+
+<file path="validators/auth/forgetPassword.validator.js">
+import Joi from 'joi';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+
+const forgetPasswordValidator = Joi.object({
+  body: Joi.object({
+    email: Joi.string().trim().lowercase().email().required().messages({
+      'any.required': ERROR_CODES.EMAIL_REQUIRED,
+      'string.empty': ERROR_CODES.EMAIL_REQUIRED,
+      'string.email': ERROR_CODES.EMAIL_INVALID,
+    }),
+  }),
+});
+export default forgetPasswordValidator;
+</file>
+
+<file path="validators/auth/login.validator.js">
+import Joi from 'joi';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+
+const loginValidator = Joi.object({
+  body: Joi.object({
+    email: Joi.string().trim().lowercase().email().required().messages({
+      'any.required': ERROR_CODES.EMAIL_REQUIRED,
+      'string.empty': ERROR_CODES.EMAIL_REQUIRED,
+      'string.email': ERROR_CODES.EMAIL_INVALID,
+    }),
+
+    password: Joi.string().min(8).required().messages({
+      'any.required': ERROR_CODES.PASSWORD_REQUIRED,
+      'string.empty': ERROR_CODES.PASSWORD_REQUIRED,
+      'string.min': ERROR_CODES.PASSWORD_TOO_SHORT,
+      'string.max': ERROR_CODES.PASSWORD_TOO_LONG,
+      'string.pattern.base': ERROR_CODES.PASSWORD_WEAK,
+    }),
+  }),
+});
+
+export default loginValidator;
+</file>
+
+<file path="validators/auth/register.validator.js">
+import Joi from 'joi';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+import { isDisposableEmail } from '@visulima/disposable-email-domains';
+
+const checkDisposableEmail = (email, helpers) => {
+  if (isDisposableEmail(email)) {
+    return helpers.error('string.disposable');
+  }
+  return email;
+};
+
+const registerValidator = Joi.object({
+  body: Joi.object({
+    username: Joi.string().trim().min(6).max(20).required().messages({
+      'any.required': ERROR_CODES.USERNAME_REQUIRED,
+      'string.empty': ERROR_CODES.USERNAME_REQUIRED,
+      'string.min': ERROR_CODES.USERNAME_TOO_SHORT,
+      'string.max': ERROR_CODES.USERNAME_TOO_LONG,
+    }),
+
+    firstName: Joi.string().trim().min(2).max(20).required().messages({
+      'any.required': ERROR_CODES.FIRSTNAME_REQUIRED,
+      'string.empty': ERROR_CODES.FIRSTNAME_REQUIRED,
+      'string.min': ERROR_CODES.FIRSTNAME_TOO_SHORT,
+      'string.max': ERROR_CODES.FIRSTNAME_TOO_LONG,
+    }),
+
+    lastName: Joi.string().trim().min(2).max(20).required().messages({
+      'any.required': ERROR_CODES.LASTNAME_REQUIRED,
+      'string.empty': ERROR_CODES.LASTNAME_REQUIRED,
+      'string.min': ERROR_CODES.LASTNAME_TOO_SHORT,
+      'string.max': ERROR_CODES.LASTNAME_TOO_LONG,
+    }),
+
+    email: Joi.string()
+      .trim()
+      .lowercase()
+      .email()
+      .custom(checkDisposableEmail)
+      .required()
+      .messages({
+        'any.required': ERROR_CODES.EMAIL_REQUIRED,
+        'string.empty': ERROR_CODES.EMAIL_REQUIRED,
+        'string.email': ERROR_CODES.EMAIL_INVALID,
+      }),
+
+    password: Joi.string()
+      .min(8)
+      .max(128)
+      .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&+-°])/)
+      .required()
+      .messages({
+        'any.required': ERROR_CODES.PASSWORD_REQUIRED,
+        'string.empty': ERROR_CODES.PASSWORD_REQUIRED,
+        'string.min': ERROR_CODES.PASSWORD_TOO_SHORT,
+        'string.max': ERROR_CODES.PASSWORD_TOO_LONG,
+        'string.pattern.base': ERROR_CODES.PASSWORD_WEAK,
+      }),
+  }),
+});
+
+export default registerValidator;
+</file>
+
+<file path="validators/auth/resendActivation.validator.js">
+import Joi from 'joi';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+
+const resendActivationValidator = Joi.object({
+  body: Joi.object({
+    email: Joi.string().trim().lowercase().email().required().messages({
+      'any.required': ERROR_CODES.EMAIL_REQUIRED,
+      'string.empty': ERROR_CODES.EMAIL_REQUIRED,
+      'string.email': ERROR_CODES.EMAIL_INVALID,
+    }),
+  }),
+});
+export default resendActivationValidator;
+</file>
+
+<file path="validators/auth/resetPassword.validator.js">
+import Joi from 'joi';
+import ERROR_CODES from '../../constants/errorCodes.constant.js';
+
+const resetPasswordValidator = Joi.object({
+  body: Joi.object({
+    code: Joi.string().trim().length(6).required().messages({
+      'any.required': ERROR_CODES.RESET_TOKEN_REQUIRED,
+      'string.empty': ERROR_CODES.RESET_TOKEN_REQUIRED,
+      'string.length': ERROR_CODES.RESET_TOKEN_INVALID,
+    }),
+    newPassword: Joi.string().min(8).required().messages({
+      'any.required': ERROR_CODES.PASSWORD_REQUIRED,
+      'string.empty': ERROR_CODES.PASSWORD_REQUIRED,
+      'string.min': ERROR_CODES.PASSWORD_TOO_SHORT,
+    }),
+  }),
+});
+
+export default resetPasswordValidator;
+</file>
+
+<file path=".env.example">
+NODE_ENV=development
+APP_URL=http://localhost:3000/api/v1/auth
+SERVER_PORT=3000
+CLIENT_URL=http://localhost:4200
+
+MONGO_URI=mongodb://127.0.0.1:27017/your_database_name
+
+UPSTASH_REDIS_REST_URL="your_upstash_redis_url_here"
+UPSTASH_REDIS_REST_TOKEN="your_upstash_redis_token_here"
+
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=465
+MAIL_SECURE=true
+MAIL_USER=your_email@gmail.com
+MAIL_PASS=your_app_password_here
+MAIL_FROM=<your_email@gmail.com>
+
+JWT_SECRET=your_ultra_secure_jwt_secret_key_here
+JWT_EXPIRES=600
+REFRESH_TOKEN_EXPIRES=604800
+
+LENGTH_ACTIVATION_TOKEN=32
+ACTIVATION_TOKEN_EXPIRES=86400
+LENGTH_RESET_TOKEN=3
+RESET_TOKEN_EXPIRES=600
+JWT_RESEND_EXPIRES=600
+</file>
+
+<file path=".gitignore">
+node_modules/
+.vscode/
+.env
+</file>
+
+<file path=".prettierrc">
+{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "printWidth": 90,
+  "bracketSpacing": true,
+  "arrowParens": "always"
+}
+</file>
+
+<file path="app.js">
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
+import 'dotenv/config';
+
+// Configurations & Middlewares
+import { corsConfig } from './config/cors.config.js';
+import { morganConfig } from './config/morgan.config.js';
+import { helmetMiddleware } from './config/helmet.config.js';
+import notFound from './middlewares/notFound.middleware.js';
+import errorHandler from './errors/errorHandler.error.js';
+import protect from './middlewares/auth.middleware.js';
+
+// Rate Limiting Import
+import { globalRateLimit } from './middlewares/rateLimit.middleware.js';
+
+// Routers
+import authRouter from './routes/auth.router.js';
+import advRouter from './routes/advance.router.js';
+
+const app = express();
+
+// Security optimizations
+app.disable('x-powered-by');
+app.set('trust proxy', 1); // Crucial for accurate rate-limiting behind proxies (Heroku, AWS ALB, Nginx)
+
+// Global Middlewares
+app.use(cookieParser());
+app.use(helmetMiddleware);
+app.use(cors(corsConfig));
+app.use(morgan(morganConfig));
+
+// Body parser with Multipart handling exemption
+app.use((req, res, next) => {
+  const isMultipart = req.headers['content-type']?.startsWith('multipart/form-data');
+  if (!isMultipart) {
+    express.json()(req, res, next);
+  } else {
+    next();
+  }
+});
+
+// Apply Global Rate Limiting to all incoming traffic
+app.use(globalRateLimit);
+
+// --- Application Routes ---
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/adv', protect, advRouter);
+
+// --- Error Boundaries ---
+app.use(notFound);
+app.use(errorHandler);
+
+export default app;
+</file>
+
+<file path="eslint.config.js">
+import globals from 'globals';
+import pluginImport from 'eslint-plugin-import';
+
+export default [
+  {
+    // فحص جميع ملفات الجافاسكريبت وتجاهل node_modules تلقائياً
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+        ...globals.es2021,
+      },
+    },
+    plugins: {
+      import: pluginImport,
+    },
+    rules: {
+      // 1. قواعد جودة ومتغيرات الكود (Clean Code)
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-undef': 'error',
+      'prefer-const': 'error',
+      eqeqeq: ['error', 'always'],
+      'no-var': 'error', // إجبار استخدام let و const ومنع var تماماً
+
+      // 2. قواعد الحماية والتحكم بالأخطاء (تم تصحيح المسميات هنا لتناسب الإصدار الحديث)
+      'no-console': 'off',
+      'no-const-assign': 'error',
+      'no-duplicate-imports': 'error',
+      'no-await-in-loop': 'warn', // تم تعديلها هنا لتصبح مستقلة وبدون علامة @ لتعمل فوراً!
+
+      // 3. قواعد استيراد الملفات لتنظيم شكل الملفات
+      'import/first': 'error',
+      'import/newline-after-import': 'error',
+    },
+  },
+];
+</file>
+
+<file path="last.review.md">
+# Auth Review
+
+Scope: auth system only. I ignored rate limit, tests, logs, and this README itself, as requested.
+
+Overall rating: 4/10.
+
+## Findings
+
+1. Critical: the login token payload and the auth guard do not agree on the role field.
+	- In `useCases/auth/login.useCase.js`, the token payload is built with `roles`.
+	- In `useCases/auth/auth.UseCase.js`, the guard reads `role` and later compares `user.roles` to `role`.
+	- Result: a token produced by login can fail in `protect` because the fresh token does not contain the field the guard expects.
+
+2. High: the logout-from-all route is wired to the single-session logout use case.
+	- In `controllers/auth/logoutFromAll.controller.js`, the controller imports `../../useCases/auth/logout.useCase.js`.
+	- The same controller calls that imported function when the endpoint is `/logoutFromAll`.
+	- Result: the route name says logout from all sessions, but the code path only logs out one session.
+
+3. High: resend-forgot-password uses the wrong Mongoose lookup API.
+	- In `services/token/Token.service.js`, `findResetTokenById` calls `ResetToken.findById({ _id: resetTokenId })`.
+	- `findById` should receive the id directly, not an object wrapper.
+	- Result: the resend-forgot-password flow can fail even when the token exists.
+
+4. Medium: activation token expiry is inconsistent between initial issue and resend.
+	- In `useCases/auth/register.useCase.js`, activation expiry is multiplied by `1000`.
+	- In `useCases/auth/resendActivation.useCase.js`, the same value is used without converting units.
+	- Result: if `ACTIVATION_TOKEN_EXPIRES` is configured in seconds, the resent token expires too early.
+
+5. Medium: one logout error branch swaps the `AppError` arguments.
+	- In `useCases/auth/logout.useCase.js`, the user-not-found branch passes `ERROR_CODES.USER_NOT_FOUND` where the status code should be.
+	- The `401` status code is passed in the code slot.
+	- Result: the error object is malformed in that branch.
+
+## Practical Impact
+
+The first issue is the most important one for Postman testing because it can break the normal login -> protected route flow immediately. The second and third issues break specific auth actions. The fourth and fifth are consistency and correctness problems, but they are still worth fixing before finishing auth.
+</file>
+
+<file path="package.json">
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "M003aad",
+  "license": "ISC",
+  "devDependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "joi": "^18.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.0.2",
+    "morgan": "^1.10.1",
+    "nodemailer": "^9.0.3",
+    "nodemon": "^3.1.11",
+    "prettier": "^3.9.5",
+    "socket.io": "^4.8.1",
+    "winston": "^3.19.0"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.38.0",
+    "@visulima/disposable-email-domains": "^1.0.0",
+    "exif-reader": "^2.0.3",
+    "helmet": "^8.1.0",
+    "limi": "^1.0.1",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.35.3"
+  }
+}
+</file>
+
+<file path="prompt.to.generate.readme.md">
+#Workspace Act as an expert technical writer and developer. Scan my entire project workspace and generate a highly professional, comprehensive README.md file for this codebase .
+
+Please follow these guidelines strictly:
+1. Architecture Overview: Briefly explain the core purpose of this project and the tech stack used.
+2. Codebase Breakdown: Map out the folder structure and explain what each main directory/file does.
+3. Feature Set: List the key functionalities currently implemented in the code.
+4. Setup & Installation: Provide clear, step-by-step instructions on how to clone, install dependencies, configure environment variables, and run the project locally.
+5. API Endpoint Documentation (If applicable): Detail the main routes, expected payloads, and responses.
+
+Make the layout visually clean, scannable, and use proper Markdown formatting (tables, code blocks, and lists). Do not use generic filler text—tailor it exactly to the files you see in this workspace.
+</file>
+
+<file path="prompt.to.generate.review.md">
+#Workspace Act as an expert backend security and code quality reviewer. Provide a highly specific, deep-dive analysis of the authentication system code provided below in Review.md file.
+
+🔍 Strict Review Constraints
+To keep the analysis laser-focused on my current development phase, strictly IGNORE the following components:
+
+JWT Returns in Responses: Do not critique how the JWT is packaged or returned in the final HTTP response (I am handling this manually via Postman for now).
+
+Tests, Logs, & Readme: Ignore the absence or structure of test suites, logging setups, or documentation. I will handle these once the core logic is solid.
+
+Rate Limiting: Ignore any lack of rate limiting or brute-force protection. This is purely for a local testing environment.
+
+Global Backend Architecture: Do not evaluate this as a complete global backend. Judge it strictly and exclusively as a standalone authentication system.
+
+🎯 Focus Areas for Analysis
+Please evaluate the code with extreme specificity on the following points:
+
+Core Auth Logic: Is the logic for registration, login, and token handling robust? Are there hidden logical flaws?
+
+Security Vulnerabilities: Look for edge cases, password handling risks (hashing/salting logic), or timing attacks within the auth flow itself.
+
+Function Structure & Code Quality: Since some functions look similar due to the testing nature of this build, analyze if they are clean, maintainable, and properly modularized.
+</file>
+
+<file path="README.md">
+# Backend Auth Service
+
+An Express-based authentication API focused on account registration, email activation, login, protected-session checks, logout, and password reset flows. The codebase is organized around controllers, use cases, and service adapters so the request layer stays thin and the business logic remains isolated.
+
+## Architecture Overview
+
+The project is built as a layered Node.js backend:
+
+```mermaid
+flowchart LR
+  Client[Client / Postman] --> App[app.js + server.js]
+  App --> Routes[Express Routes]
+  Routes --> Controllers[Controllers]
+  Controllers --> UseCases[Auth Use Cases]
+  UseCases --> Domain[Domain Services]
+  UseCases --> TokenSvc[Token Services]
+  UseCases --> MailSvc[Mail Service]
+  UseCases --> JwtSvc[JWT / Session Service]
+  Domain --> Mongo[(MongoDB / Mongoose)]
+  JwtSvc --> Mongo
+  TokenSvc --> Mongo
+  JwtSvc --> Redis[(Upstash Redis)]
+  MailSvc --> SMTP[(SMTP Mail Server)]
+```
+
+### Tech Stack
+
+- Node.js with Express 5
+- MongoDB with Mongoose
+- JSON Web Tokens for access/session tokens
+- Joi for request validation
+- Nodemailer for activation and reset emails
+- Multer and Sharp for avatar upload processing
+- Helmet, CORS, Morgan, and cookie-parser for middleware support
+- Upstash Redis for rate-limiting storage
+
+## Codebase Breakdown
+
+| Path | Purpose |
+| --- | --- |
+| `app.js` | Creates the Express app, applies global middleware, mounts routes, and registers error handling. |
+| `server.js` | Boots the HTTP server and connects to MongoDB before listening. |
+| `config/` | Environment, database, mail, CORS, Helmet, Morgan, Redis, and rate-limit configuration. |
+| `constants/` | Shared message and code maps for success responses, errors, and mail types. |
+| `controllers/auth/` | Thin HTTP controllers for register, login, activation, logout, and password reset flows. |
+| `errors/` | Custom error class and centralized error handler. |
+| `middlewares/` | Upload, validation, authentication, not-found, and rate-limit middleware. |
+| `models/` | Mongoose models for `User`, `Session`, `ActivationToken`, and `ResetToken`. |
+| `routes/` | Route definitions for auth and protected advanced routes. |
+| `services/auth.service.js` | Higher-level auth helpers and orchestration utilities. |
+| `services/domain/` | Mongoose access helpers for user records. |
+| `services/JWT/` | Session creation, lookup, and logout helpers. |
+| `services/mail/` | Email transport and HTML templates for activation and reset emails. |
+| `services/token/` | Token persistence helpers for activation and reset flows. |
+| `useCases/auth/` | Business logic for login, register, activate, reset password, resend flows, and logout. |
+| `utils/` | JWT, password, token, and extraction helpers. |
+| `validators/auth/` | Joi schemas for request validation. |
+| `uploads/` | Local storage for processed avatar files. |
+| `sockets/` | Reserved for realtime features; no socket route is currently mounted in `app.js`. |
+
+## Feature Set
+
+- User registration with Joi validation and disposable-email blocking.
+- Optional avatar upload on registration with image format checks and Sharp metadata stripping.
+- Email activation token generation and activation-link delivery.
+- Login with password comparison, session creation, and JWT access token issuance.
+- Protected route guard that validates bearer tokens and reissues access tokens when needed.
+- Logout from the current session or from all sessions.
+- Forgot-password and resend-reset-email flows with short-lived reset tokens.
+- Password reset using a 6-character code and a new password.
+- Global and auth-specific rate limiting backed by Upstash Redis.
+- Centralized error handling with a JSON `{ message }` response shape.
+
+## Setup & Installation
+
+### 1) Clone the repository
+
+```bash
+git clone <your-repo-url>
+cd backend
+```
+
+### 2) Install dependencies
+
+```bash
+npm install
+```
+
+### 3) Create your environment file
+
+Copy the sample file and fill in the values for your local environment.
+
+```bash
+copy .env.example .env
+```
+
+If you are using PowerShell, the equivalent command is:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### 4) Configure external services
+
+- Start a MongoDB instance and set `MONGO_URI`.
+- Create an Upstash Redis database and set the Redis REST URL and token.
+- Configure an SMTP account for mail delivery.
+- Ensure `CLIENT_URL` matches the frontend origin you want to allow through CORS.
+
+### 5) Run the server
+
+Development mode:
+
+```bash
+npm run dev
+```
+
+Production mode:
+
+```bash
+npm start
+```
+
+### Available scripts
+
+| Script | Command | Purpose |
+| --- | --- | --- |
+| `dev` | `nodemon server.js` | Start the API in development mode with auto-reload. |
+| `start` | `node server.js` | Start the API without auto-reload. |
+| `lint` | `eslint .` | Run ESLint across the project. |
+| `format` | `prettier --write .` | Format the codebase with Prettier. |
+| `test` | `echo "Error: no test specified" && exit 1` | Placeholder test script. |
+
+## Environment Variables
+
+The sample environment file is [`/.env.example`](.env.example). The code reads the following values:
+
+| Variable | Used By | Purpose |
+| --- | --- | --- |
+| `NODE_ENV` | `config/db.config.js` | Switches Mongoose auto-indexing behavior. |
+| `APP_URL` | Auth use cases | Builds activation links for emails. |
+| `SERVER_PORT` | `server.js` | Port used by the HTTP server. |
+| `CLIENT_URL` | `config/cors.config.js` | Allowed frontend origin for CORS. |
+| `MONGO_URI` | `config/db.config.js` | MongoDB connection string. |
+| `UPSTASH_REDIS_REST_URL` | `config/redis.config.js` | Redis REST endpoint used by the rate-limit store. |
+| `UPSTASH_REDIS_REST_TOKEN` | `config/redis.config.js` | Redis REST auth token. |
+| `MAIL_HOST` | `config/mail.config.js` | SMTP host. |
+| `MAIL_PORT` | `config/mail.config.js` | SMTP port. |
+| `MAIL_SECURE` | `config/mail.config.js` | Enables secure SMTP transport when set to `true`. |
+| `MAIL_USER` | `config/mail.config.js` | SMTP username. |
+| `MAIL_PASS` | `config/mail.config.js` | SMTP password or app password. |
+| `MAIL_FROM` | `config/mail.config.js` | Default sender address. |
+| `JWT_SECRET` | JWT utilities | Secret used to sign and verify JWTs. |
+| `JWT_EXPIRES` | Auth/session use cases | Access-token lifetime used when issuing JWTs. |
+| `JWT_RESEND_EXPIRES` | Password-reset use cases | Lifetime for the resend/reset helper token. |
+| `ACTIVATION_TOKEN_EXPIRES` | Activation use cases | Lifetime for activation tokens. |
+| `RESET_TOKEN_EXPIRES` | Password-reset use cases | Lifetime for reset tokens. |
+| `LENGTH_ACTIVATION_TOKEN` | `utils/generateRandomToken.utils.js` consumers | Length of activation codes. |
+| `LENGTH_RESET_TOKEN` | `utils/generateRandomToken.utils.js` consumers | Length of reset codes. |
+
+## API Endpoint Documentation
+
+### Base paths
+
+- Public auth routes: `/api/v1/auth`
+- Protected demo route: `/api/v1/adv`
+
+### Authentication header
+
+Protected endpoints read the JWT from:
+
+```http
+Authorization: Bearer <access-token>
+```
+
+### Standard response shape
+
+Success and error responses are JSON objects. Most errors return:
+
+```json
+{
+  "message": "Human-readable message"
+}
+```
+
+### Public auth routes
+
+| Method | Path | Body / Params | Purpose | Typical Success Response |
+| --- | --- | --- | --- | --- |
+| `GET` | `/api/v1/auth/ping` | None | Health check for the auth service. | `{ "success": true, "message": "auth service up" }` |
+| `POST` | `/api/v1/auth/register` | `multipart/form-data` with `username`, `firstName`, `lastName`, `email`, `password`, optional `avatar` | Creates a new user and sends an activation email. | `201` with `{ "message": "Registration completed successfully! Please check your inbox to activate your account." }` |
+| `GET` | `/api/v1/auth/activate/:token` | `token` in URL params | Activates a user account using the emailed token. | `200` with an activation success message. |
+| `POST` | `/api/v1/auth/resend-activate` | `{ "email": "user@example.com" }` | Sends a new activation email. | `201` with a resend success message. |
+| `POST` | `/api/v1/auth/login` | `{ "email": "user@example.com", "password": "YourPassword123!" }` | Authenticates the user and starts a session. | `201` with `{ "message": "Welcome back! You have logged in successfully.", "token": { "accessToken": "..." } }` |
+| `GET` | `/api/v1/auth/logout` | Bearer token required | Logs out the current session. | `201` with a logout success message. |
+| `GET` | `/api/v1/auth/logoutFromAll` | Bearer token required | Logs out the user from all sessions. | `201` with a logout success message. |
+| `POST` | `/api/v1/auth/forget-password` | `{ "email": "user@example.com" }` | Starts the password-reset flow and emails a short code. | `201` with `{ "message": "A password reset link has been sent to your email. Please check your inbox.", "rawToken": "...", "resendToken": "..." }` |
+| `GET` | `/api/v1/auth/resend-forget-password` | Bearer token required | Sends a new password-reset code. | `201` with `{ "message": "The password reset link has been resent successfully. Please check your inbox.", "code": { "rawToken": "..." } }` |
+| `POST` | `/api/v1/auth/reset-password` | `{ "code": "123456", "newPassword": "NewPassword123!" }` | Resets the password using the emailed code. | `201` with a password-reset success message. |
+
+### Protected demo route
+
+| Method | Path | Purpose | Response |
+| --- | --- | --- | --- |
+| `GET` | `/api/v1/adv/test` | Example protected endpoint that runs through the auth middleware. | `{ "success": true, "message": "ok next", "accessToken": "...", "userId": "...", "oldToken": "..." }` |
+
+### Example requests
+
+#### Register
+
+```bash
+POST /api/v1/auth/register
+Content-Type: multipart/form-data
+
+username=janedoe
+firstName=Jane
+lastName=Doe
+email=jane@example.com
+password=StrongPass123!
+avatar=<file>
+```
+
+#### Login
+
+```bash
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "StrongPass123!"
+}
+```
+
+#### Protected request
+
+```bash
+GET /api/v1/adv/test
+Authorization: Bearer <access-token>
+```
+
+## Notes on the Current Implementation
+
+- The auth flow is session-backed through the `Session` model and JWTs.
+- Activation and reset links are sent through email templates in `services/mail/templates/`.
+- Uploaded avatars are stored locally in `uploads/` after being processed with Sharp.
+- The codebase already includes separate validators, services, and use cases for keeping the auth logic organized.
+</file>
+
+<file path="Review.md">
+
+</file>
+
+<file path="server.js">
+import app from './app.js';
+import env from './config/env.config.js';
+import { connectDB } from './config/db.config.js';
+
+connectDB();
+
+const port = Number(env.SERVER_PORT) || 3000;
+const server = app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
+
+export default server;
+</file>
+
+</files>
